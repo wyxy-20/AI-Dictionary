@@ -2,7 +2,7 @@
 
 面向 AI 学习者的专业 AI 术语词典 —— Windows 桌面应用。
 
-基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（英文 / 中文 / 分类 / 难度 / 简介 / 详细解释 / 应用场景 / 相关词条），支持实时搜索、A-Z 字母导航、收藏与浏览历史，数据全部本地保存、可离线使用。
+基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（英文 / 中文 / 分类 / 难度 / 简介 / 详细解释 / 应用场景 / 相关词条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
 
 ## 功能一览
 
@@ -13,6 +13,7 @@
 - 我的收藏：一键收藏 / 取消收藏，收藏列表
 - 最近浏览：自动记录并去重，最多保留 100 条
 - 设置：浅色 / 深色 / 跟随系统主题、界面语言（预留）、数据管理（导出备份、清空历史、重置词库）、关于
+- 启动自动同步：打开软件即检查远程词库，自动增量下载新增词条，无需手动更新
 - AI 功能架构预留：`AiService` 接口 + 占位实现，后续接入 OpenAI / DeepSeek 即可
 
 ## 项目结构
@@ -32,25 +33,92 @@ lib/
 │   └── settings_dao.dart      # settings 表数据访问
 ├── models/
 │   ├── term.dart              # 词条模型（JSON / DB 双向转换）
+│   ├── dictionary_version.dart # 词库版本模型（本地 / 远程）
 │   └── app_settings.dart      # 设置模型
 ├── services/
 │   ├── seed_service.dart      # 首次启动导入 JSON 词库
 │   ├── search_service.dart    # 高级搜索（中英 / 关键词 / 模糊）
 │   ├── data_export_service.dart # 词库 JSON 备份导出
+│   ├── update_service.dart     # 启动自动同步词库（检查版本/下载/增量更新）
 │   └── ai/ai_service.dart     # AI 功能预留接口 + Stub 实现
 ├── providers/
 │   ├── dictionary_provider.dart # 词库、搜索、视图、收藏、历史状态
 │   └── settings_provider.dart   # 主题 / 语言状态
 ├── screens/
 │   ├── home_screen.dart       # 主界面（顶栏 + 三栏）
+│   ├── splash_screen.dart     # 启动加载页（同步状态展示）
 │   └── settings_dialog.dart   # 设置对话框
 ├── widgets/                   # 左侧导航、词条列表、详情、搜索框等组件
 └── utils/string_utils.dart    # 编辑距离、搜索高亮等工具
+utils/version_utils.dart       # 语义化版本号比较
 
 assets/data/terms/             # 26 个字母 JSON 词库（319 个词条）
-test/                          # 单元测试 + 组件测试（27 个用例）
+test/                          # 单元测试 + 组件测试（40 个用例）
 tool/generate_icon.py          # 应用图标生成脚本
 ```
+
+## 启动自动同步词库
+
+软件每次启动会短暂显示加载页，并自动执行：
+
+```text
+初始化数据库
+  ↓
+检查远程 version.json
+  ↓
+比较本地 / 远程版本（本地 >= 远程则跳过）
+  ↓
+下载最新 terms.json
+  ↓
+增量插入本地不存在的词条（不删除、不覆盖，收藏与历史不受影响）
+  ↓
+进入主界面
+```
+
+规则：
+
+- **24 小时内已成功检查过**则直接跳过，避免每次启动重复下载；
+- **无网络或远程不可达**时静默降级到本地 SQLite 词库，正常进入软件，不弹错误；
+- 本地版本记录在 `dictionary_version` 表（version / update_time / terms_count / last_check_time）。
+
+### 如何发布新的在线词库
+
+1. 在 GitHub 创建公开仓库 `AI-Terms-Database`（或任意名称）；
+2. 添加两个文件：
+
+   `version.json`：
+
+   ```json
+   {
+     "version": "1.1.0",
+     "update_time": "2026-08-08",
+     "terms_count": 500
+   }
+   ```
+
+   `terms.json`（数组，或 `{"terms": [...]}` 均可）：
+
+   ```json
+   [
+     {
+       "english_name": "NewTerm",
+       "chinese_name": "新术语",
+       "category": "分类",
+       "difficulty": 1,
+       "short_description": "一句话解释",
+       "detail_description": "详细解释",
+       "application": ["场景一"],
+       "related_terms": ["AI"]
+     }
+   ]
+   ```
+
+3. 修改 [app_config.dart](lib/core/config/app_config.dart) 中的
+   `remoteDictionaryBaseUrl`，指向你的 GitHub Raw 地址；
+4. 重新构建发布。已安装的用户下次打开软件（或超过 24 小时后）会自动同步，无需重新安装。
+
+> 每次发布新版本时把 `version.json` 的版本号调高（如 1.2.0），
+> 软件会在下次检查时自动下载并增量添加新增词条。
 
 ## 如何运行
 

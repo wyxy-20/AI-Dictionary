@@ -5,10 +5,13 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.0.0';
+  static const String version = '1.1.0';
 
   static const String databaseFileName = 'ai_dictionary.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
+
+  /// 内置 JSON 词库的版本号（本地词典初始版本）。
+  static const String seedDictionaryVersion = '1.0.0';
 
   /// 词库种子数据存放目录（每个字母一个 JSON 文件）。
   static const String seedAssetFolder = 'assets/data/terms';
@@ -25,4 +28,17 @@ class AppConfig {
 
   /// 词库最低词条数量（用于测试与启动自检）。
   static const int minSeedTerms = 300;
+
+  /// 远程词库来源（第一阶段：GitHub Raw）。
+  /// 发布新词库时请替换为你的仓库地址，结构：
+  ///   `<baseUrl>/version.json`
+  ///   `<baseUrl>/terms.json`
+  static const String remoteDictionaryBaseUrl =
+      'https://raw.githubusercontent.com/AIDictionary-Project/AI-Terms-Database/main';
+
+  /// 自动检查更新的最小间隔（避免每次启动重复下载）。
+  static const Duration remoteCheckInterval = Duration(hours: 24);
+
+  /// 远程请求超时（网络异常时快速降级到本地词库）。
+  static const Duration remoteTimeout = Duration(seconds: 8);
 }
