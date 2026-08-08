@@ -34,7 +34,7 @@ class AppConfig {
   ///   `<baseUrl>/version.json`
   ///   `<baseUrl>/terms.json`
   static const String remoteDictionaryBaseUrl =
-      'https://raw.githubusercontent.com/AIDictionary-Project/AI-Terms-Database/main';
+      'https://raw.githubusercontent.com/wyxy-20/AI-Terms-Database/main';
 
   /// 自动检查更新的最小间隔（避免每次启动重复下载）。
   static const Duration remoteCheckInterval = Duration(hours: 24);
