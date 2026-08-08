@@ -83,8 +83,11 @@ tool/generate_icon.py          # 应用图标生成脚本
 
 ### 如何发布新的在线词库
 
+项目已附带了可直接上传的远程词库目录 [AI-Terms-Database](AI-Terms-Database/)：
+包含 `version.json`（1.1.0，1094 条）与 `terms.json`，字段与客户端完全兼容。
+
 1. 在 GitHub 创建公开仓库 `AI-Terms-Database`（或任意名称）；
-2. 添加两个文件：
+2. 把本项目的 `AI-Terms-Database/` 目录内容（`version.json`、`terms.json`、`README.md`）上传到仓库；
 
    `version.json`：
 

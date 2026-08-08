@@ -13,6 +13,8 @@
 migrate_working_dir/
 .test-libs/
 test/.support/
+# 独立的远程词库仓库（AI-Terms-Database 有自己的 git 仓库）
+AI-Terms-Database/
 
 # IntelliJ related
 *.iml
