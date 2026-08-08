@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     备份当前 AI Dictionary 版本（源码 ZIP + 可运行程序 ZIP）。
 .DESCRIPTION

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     从备份目录恢复 AI Dictionary 源码与可运行程序。
 .DESCRIPTION
