@@ -6,8 +6,10 @@ import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'database/app_database.dart';
 import 'database/history_dao.dart';
+import 'database/ai_settings_dao.dart';
 import 'database/settings_dao.dart';
 import 'database/term_dao.dart';
+import 'providers/ai_config_provider.dart';
 import 'providers/dictionary_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
@@ -58,6 +60,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
   String _detail = '';
   SettingsProvider? _settingsProvider;
   DictionaryProvider? _dictionaryProvider;
+  AiConfigProvider? _aiConfigProvider;
 
   @override
   void initState() {
@@ -92,19 +95,23 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
 
     // 3. 创建并加载 Provider（主界面数据源）。
     final settingsProvider = SettingsProvider(SettingsDao(widget.database));
+    final aiConfigProvider = AiConfigProvider(AiSettingsDao(widget.database));
     final dictionaryProvider = DictionaryProvider(
       database: widget.database,
       termDao: TermDao(widget.database),
       historyDao: HistoryDao(widget.database),
       searchService: const SearchService(),
+      aiConfigProvider: aiConfigProvider,
     );
     try {
       await settingsProvider.load();
+      await aiConfigProvider.load();
       await dictionaryProvider.load();
     } catch (_) {
       // 保持空状态进入主界面。
     }
     _settingsProvider = settingsProvider;
+    _aiConfigProvider = aiConfigProvider;
     _dictionaryProvider = dictionaryProvider;
 
     // 4. 保证加载页至少展示片刻，避免闪烁。
@@ -128,6 +135,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
           ? MultiProvider(
               providers: [
                 ChangeNotifierProvider.value(value: settings!),
+                ChangeNotifierProvider.value(value: _aiConfigProvider!),
                 ChangeNotifierProvider.value(value: _dictionaryProvider!),
               ],
               child: const HomeScreen(),

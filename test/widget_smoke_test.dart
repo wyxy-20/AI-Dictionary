@@ -1,8 +1,10 @@
 import 'package:ai_dictionary/database/app_database.dart';
+import 'package:ai_dictionary/database/ai_settings_dao.dart';
 import 'package:ai_dictionary/database/history_dao.dart';
 import 'package:ai_dictionary/database/settings_dao.dart';
 import 'package:ai_dictionary/database/term_dao.dart';
 import 'package:ai_dictionary/models/term.dart';
+import 'package:ai_dictionary/providers/ai_config_provider.dart';
 import 'package:ai_dictionary/providers/dictionary_provider.dart';
 import 'package:ai_dictionary/providers/settings_provider.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
@@ -32,6 +34,9 @@ Widget buildApp(AppDatabase db) {
     providers: [
       ChangeNotifierProvider(
         create: (_) => SettingsProvider(SettingsDao(db))..load(),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => AiConfigProvider(AiSettingsDao(db))..load(),
       ),
       ChangeNotifierProvider(
         create: (_) => DictionaryProvider(

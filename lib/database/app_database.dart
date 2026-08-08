@@ -82,6 +82,7 @@ class AppDatabase {
         application TEXT NOT NULL DEFAULT '[]',
         related_terms TEXT NOT NULL DEFAULT '[]',
         first_created INTEGER NOT NULL,
+        version INTEGER NOT NULL DEFAULT 1,
         favorite INTEGER NOT NULL DEFAULT 0
       )
     ''');
@@ -104,6 +105,7 @@ class AppDatabase {
     ''');
     await _createVersionTable(db);
     await _initVersionRow(db);
+    await _createAiTables(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -111,6 +113,47 @@ class AppDatabase {
       await _createVersionTable(db);
       await _initVersionRow(db);
     }
+    if (oldVersion < 3) {
+      await _addTermVersionColumn(db);
+      await _createAiTables(db);
+    }
+  }
+
+  Future<void> _addTermVersionColumn(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(terms)');
+    final hasVersion = columns.any((c) => c['name'] == 'version');
+    if (!hasVersion) {
+      await db.execute(
+        'ALTER TABLE terms ADD COLUMN version INTEGER NOT NULL DEFAULT 1',
+      );
+    }
+  }
+
+  Future<void> _createAiTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ai_explanation_cache (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        term_id INTEGER NOT NULL,
+        term_version INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        model_name TEXT NOT NULL DEFAULT '',
+        created_time INTEGER NOT NULL,
+        updated_time INTEGER NOT NULL,
+        FOREIGN KEY (term_id) REFERENCES terms(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ai_cache_term '
+      'ON ai_explanation_cache(term_id, term_version, model_name)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ai_settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        base_url TEXT NOT NULL DEFAULT '',
+        api_key TEXT NOT NULL DEFAULT '',
+        model_name TEXT NOT NULL DEFAULT ''
+      )
+    ''');
   }
 
   Future<void> _createVersionTable(Database db) async {

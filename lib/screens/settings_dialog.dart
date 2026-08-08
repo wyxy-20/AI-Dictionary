@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
 import '../core/constants/app_constants.dart';
+import '../models/ai_config.dart';
+import '../providers/ai_config_provider.dart';
 import '../providers/dictionary_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/data_export_service.dart';
@@ -18,6 +20,48 @@ class SettingsDialog extends StatefulWidget {
 
 class _SettingsDialogState extends State<SettingsDialog> {
   bool _busy = false;
+  late final TextEditingController _baseUrlCtrl;
+  late final TextEditingController _apiKeyCtrl;
+  late final TextEditingController _modelCtrl;
+  bool _obscureKey = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final config = context.read<AiConfigProvider>().config;
+    _baseUrlCtrl = TextEditingController(text: config.baseUrl);
+    _apiKeyCtrl = TextEditingController(text: config.apiKey);
+    _modelCtrl = TextEditingController(text: config.modelName);
+  }
+
+  @override
+  void dispose() {
+    _baseUrlCtrl.dispose();
+    _apiKeyCtrl.dispose();
+    _modelCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveAiConfig() async {
+    final provider = context.read<AiConfigProvider>();
+    final baseUrl = _baseUrlCtrl.text.trim();
+    final apiKey = _apiKeyCtrl.text.trim();
+    final modelName = _modelCtrl.text.trim();
+    if (baseUrl.isEmpty || modelName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请填写 AI 服务地址与模型名称')),
+      );
+      return;
+    }
+    await _run(() async {
+      await provider.save(AiConfig(baseUrl: baseUrl, apiKey: apiKey, modelName: modelName));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('AI 服务配置已保存')),
+        );
+      }
+    });
+  }
 
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
@@ -215,6 +259,72 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                   ),
                   const SizedBox(height: 18),
+                  _SectionTitle(
+                    icon: Icons.settings_input_component_rounded,
+                    title: 'AI 服务设置',
+                  ),
+                  _GroupCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            '支持 OpenAI / DeepSeek / Qwen / 本地模型等 OpenAI 兼容接口',
+                            style: TextStyle(fontSize: 11.5),
+                          ),
+                        ),
+                        TextField(
+                          controller: _baseUrlCtrl,
+                          enabled: !_busy,
+                          decoration: const InputDecoration(
+                            labelText: 'AI 服务地址（Base URL）',
+                            hintText: 'https://api.openai.com/v1',
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _apiKeyCtrl,
+                          enabled: !_busy,
+                          obscureText: _obscureKey,
+                          decoration: InputDecoration(
+                            labelText: 'API Key',
+                            hintText: 'sk-...',
+                            isDense: true,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureKey
+                                    ? Icons.visibility_rounded
+                                    : Icons.visibility_off_rounded,
+                                size: 18,
+                              ),
+                              onPressed: _busy
+                                  ? null
+                                  : () => setState(() => _obscureKey = !_obscureKey),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _modelCtrl,
+                          enabled: !_busy,
+                          decoration: const InputDecoration(
+                            labelText: '模型名称（Model）',
+                            hintText: 'gpt-4o-mini / deepseek-chat / qwen-plus',
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        FilledButton.icon(
+                          onPressed: _busy ? null : _saveAiConfig,
+                          icon: const Icon(Icons.save_rounded, size: 16),
+                          label: const Text('保存 AI 服务配置'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   _SectionTitle(icon: Icons.auto_awesome_rounded, title: 'AI 功能（即将推出）'),
                   _GroupCard(
                     child: Column(
@@ -222,7 +332,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         _FutureFeatureRow(
                           icon: Icons.auto_awesome_rounded,
                           title: 'AI 解释',
-                          caption: '用大白话解释任意术语',
+                          caption: '已上线 · 点击词条详情中的 AI 解释按钮体验',
+                          released: true,
+                        ),
+                        _FutureFeatureRow(
+                          icon: Icons.compare_arrows_rounded,
+                          title: '术语对比',
+                          caption: '对比两个术语（如 RAG vs Fine-tuning）',
                         ),
                         _FutureFeatureRow(
                           icon: Icons.forum_outlined,
@@ -378,11 +494,13 @@ class _FutureFeatureRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.caption,
+    this.released = false,
   });
 
   final IconData icon;
   final String title;
   final String caption;
+  final bool released;
 
   @override
   Widget build(BuildContext context) {
@@ -393,7 +511,9 @@ class _FutureFeatureRow extends StatelessWidget {
       leading: Icon(icon, size: 20, color: scheme.primary.withValues(alpha: 0.8)),
       title: Text(title, style: const TextStyle(fontSize: 13.5)),
       subtitle: Text(caption, style: TextStyle(fontSize: 11.5, color: scheme.outline)),
-      trailing: Icon(Icons.schedule_rounded, size: 16, color: scheme.outline),
+      trailing: released
+          ? Icon(Icons.check_circle_rounded, size: 16, color: scheme.primary)
+          : Icon(Icons.schedule_rounded, size: 16, color: scheme.outline),
     );
   }
 }

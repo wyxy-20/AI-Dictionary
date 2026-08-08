@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/term.dart';
@@ -56,6 +58,30 @@ class TermDao {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  /// 若远程内容与本地不同，则更新词条内容并把 version +1（旧 AI 缓存自动失效）。
+  /// 不修改 first_created 与 favorite，保证用户数据不受影响。
+  Future<bool> updateContentIfChanged(Term current, Term remote) async {
+    final id = current.id;
+    if (id == null) return false;
+    if (current.contentSignature == remote.contentSignature) return false;
+    await _db.update(
+      'terms',
+      {
+        'chinese_name': remote.chineseName,
+        'category': remote.category,
+        'difficulty': remote.difficulty,
+        'short_description': remote.shortDescription,
+        'detail_description': remote.detailDescription,
+        'application': jsonEncode(remote.application),
+        'related_terms': jsonEncode(remote.relatedTerms),
+        'version': current.version + 1,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return true;
   }
 
   Future<List<Term>> getFavorites() async {

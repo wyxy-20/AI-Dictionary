@@ -1,9 +1,13 @@
 import 'package:flutter/foundation.dart';
 
+import '../database/ai_explanation_cache_dao.dart';
+import '../database/ai_settings_dao.dart';
 import '../database/app_database.dart';
 import '../database/history_dao.dart';
 import '../database/term_dao.dart';
 import '../models/term.dart';
+import '../models/ai_explanation.dart';
+import '../providers/ai_config_provider.dart';
 import '../services/ai/ai_service.dart';
 import '../services/search_service.dart';
 
@@ -18,14 +22,22 @@ class DictionaryProvider extends ChangeNotifier {
     required this.historyDao,
     SearchService? searchService,
     AiService? aiService,
+    AiConfigProvider? aiConfigProvider,
   })  : searchService = searchService ?? const SearchService(),
-        aiService = aiService ?? const StubAiService();
+        aiService = aiService ?? const StubAiService(),
+        _aiConfigProvider =
+            aiConfigProvider ?? AiConfigProvider(AiSettingsDao(database));
 
   final AppDatabase database;
   final TermDao termDao;
   final HistoryDao historyDao;
   final SearchService searchService;
   final AiService aiService;
+  final AiConfigProvider _aiConfigProvider;
+
+  AiConfigProvider get aiConfigProvider => _aiConfigProvider;
+  AiExplanationCacheDao get aiCacheDao =>
+      AiExplanationCacheDao(database);
 
   List<Term> _allTerms = [];
   List<Term> _recentTerms = [];
@@ -170,5 +182,30 @@ class DictionaryProvider extends ChangeNotifier {
   void clearSelection() {
     _selectedId = null;
     notifyListeners();
+  }
+
+  /// AI 解释：缓存优先 -> 未命中则调用 AI 服务 -> 成功后写入缓存。
+  ///
+  /// 缓存按 (term_id, term_version, model_name) 校验：
+  /// 词条内容更新（version 提升）或切换模型后旧缓存自动失效。
+  Future<String> explainTerm(Term term) async {
+    final id = term.id;
+    if (id == null) throw const AiServiceException('词条尚未入库，无法生成解释。');
+
+    final config = _aiConfigProvider.config;
+    final cache = await aiCacheDao.findValid(id, term.version, config.modelName);
+    if (cache != null) return cache.content;
+
+    final content = await _aiConfigProvider.buildService().explainTerm(term);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await aiCacheDao.upsert(AiExplanation(
+      termId: id,
+      termVersion: term.version,
+      content: content,
+      modelName: config.modelName,
+      createdTime: now,
+      updatedTime: now,
+    ));
+    return content;
   }
 }

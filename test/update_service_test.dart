@@ -204,6 +204,50 @@ void main() {
     expect(await TermDao(db).count(), 4);
   });
 
+  test('远程词条内容变化：更新内容并提升 version，收藏保留', () async {
+    final existing = await TermDao(db).getAll();
+    final remoteTerms = existing.map((t) {
+      if (t.englishName == 'AI') {
+        return termJson(Term(
+          englishName: 'AI',
+          chineseName: '人工智能',
+          category: '基础概念',
+          difficulty: 2,
+          shortDescription: '新的简介',
+          detailDescription: '新的详细解释内容',
+          application: const ['新场景'],
+          relatedTerms: const ['LLM', 'AGI'],
+          firstCreated: 0,
+        ));
+      }
+      return termJson(t);
+    }).toList();
+
+    final service = serviceWith((request) async {
+      if (request.url.path.endsWith('version.json')) {
+        return jsonResponse({
+          'version': '1.1.0',
+          'update_time': '2026-08-08',
+          'terms_count': remoteTerms.length,
+        });
+      }
+      return jsonResponse(remoteTerms);
+    });
+
+    final result = await service.syncIfNeeded();
+
+    expect(result.status, 'updated');
+    expect(result.addedCount, 0);
+    expect(result.updatedCount, 1);
+    expect(await TermDao(db).count(), 3);
+
+    final all = await TermDao(db).getAll();
+    final ai = all.firstWhere((t) => t.englishName == 'AI');
+    expect(ai.detailDescription, '新的详细解释内容');
+    expect(ai.version, 2, reason: '内容变化后 version 应提升');
+    expect(ai.favorite, isTrue, reason: '收藏数据不能丢失');
+  });
+
   test('启动频率配置合理', () {
     expect(AppConfig.remoteCheckInterval.inHours, 24);
     expect(AppConfig.remoteTimeout.inSeconds, lessThanOrEqualTo(10));

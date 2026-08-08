@@ -13,6 +13,7 @@ class Term {
     required this.application,
     required this.relatedTerms,
     required this.firstCreated,
+    this.version = 1,
     this.favorite = false,
   });
 
@@ -28,6 +29,7 @@ class Term {
   final List<String> application;
   final List<String> relatedTerms;
   final int firstCreated;
+  final int version;
   final bool favorite;
 
   /// 首字母（非字母归为 '#'）。
@@ -50,6 +52,7 @@ class Term {
       application: _toStringList(json['application']),
       relatedTerms: _toStringList(json['related_terms']),
       firstCreated: (json['first_created'] as num?)?.toInt() ?? 0,
+      version: (json['version'] as num?)?.toInt() ?? 1,
     );
   }
 
@@ -66,6 +69,7 @@ class Term {
       application: _decodeList(map['application']),
       relatedTerms: _decodeList(map['related_terms']),
       firstCreated: (map['first_created'] as num?)?.toInt() ?? 0,
+      version: (map['version'] as num?)?.toInt() ?? 1,
       favorite: (map['favorite'] as num?)?.toInt() == 1,
     );
   }
@@ -82,6 +86,7 @@ class Term {
       'application': jsonEncode(application),
       'related_terms': jsonEncode(relatedTerms),
       'first_created': firstCreated,
+      'version': version,
       'favorite': favorite ? 1 : 0,
     };
   }
@@ -100,7 +105,20 @@ class Term {
     };
   }
 
-  Term copyWith({bool? favorite, int? firstCreated}) {
+  /// 内容签名：用于判断远程同步时词条内容是否变化（变化则 version +1）。
+  String get contentSignature {
+    return [
+      chineseName,
+      category,
+      difficulty,
+      shortDescription,
+      detailDescription,
+      application.join('\n'),
+      relatedTerms.join('\n'),
+    ].join('||');
+  }
+
+  Term copyWith({bool? favorite, int? firstCreated, int? version}) {
     return Term(
       id: id,
       englishName: englishName,
@@ -112,6 +130,7 @@ class Term {
       application: application,
       relatedTerms: relatedTerms,
       firstCreated: firstCreated ?? this.firstCreated,
+      version: version ?? this.version,
       favorite: favorite ?? this.favorite,
     );
   }

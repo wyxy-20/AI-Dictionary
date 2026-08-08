@@ -5,10 +5,10 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.1.0';
+  static const String version = '1.2.0';
 
   static const String databaseFileName = 'ai_dictionary.db';
-  static const int databaseVersion = 2;
+  static const int databaseVersion = 3;
 
   /// 内置 JSON 词库的版本号（本地词典初始版本）。
   static const String seedDictionaryVersion = '1.0.0';
@@ -41,4 +41,12 @@ class AppConfig {
 
   /// 远程请求超时（网络异常时快速降级到本地词库）。
   static const Duration remoteTimeout = Duration(seconds: 8);
+
+  /// AI 服务默认配置（OpenAI 兼容接口）。
+  static const String defaultAiBaseUrl = 'https://api.openai.com/v1';
+  static const String defaultAiModelName = 'gpt-4o-mini';
+
+  /// AI 请求超时与输出上限。
+  static const Duration aiRequestTimeout = Duration(seconds: 30);
+  static const int aiMaxTokens = 900;
 }

@@ -13,7 +13,13 @@ import '../utils/version_utils.dart';
 
 /// 一次同步的结果。
 class SyncResult {
-  const SyncResult._(this.status, this.message, {this.version, this.addedCount});
+  const SyncResult._(
+    this.status,
+    this.message, {
+    this.version,
+    this.addedCount,
+    this.updatedCount = 0,
+  });
 
   /// skipped：24 小时内已检查；upToDate：已是最新；updated：完成增量更新；
   /// failed：网络异常，已降级到本地词库。
@@ -21,6 +27,7 @@ class SyncResult {
   final String message;
   final String? version;
   final int? addedCount;
+  final int updatedCount;
 
   bool get isUpdated => status == 'updated';
 
@@ -30,12 +37,17 @@ class SyncResult {
   factory SyncResult.upToDate(String version) =>
       SyncResult._('upToDate', '本地词库已是最新版本', version: version);
 
-  factory SyncResult.updated(String version, int added) => SyncResult._(
-        'updated',
-        '词库已更新到 $version，新增 $added 个词条',
-        version: version,
-        addedCount: added,
-      );
+  factory SyncResult.updated(String version, int added, {int updated = 0}) {
+    final updateText =
+        updated > 0 ? '，更新 $updated 个词条内容' : '';
+    return SyncResult._(
+      'updated',
+      '词库已更新到 $version，新增 $added 个词条$updateText',
+      version: version,
+      addedCount: added,
+      updatedCount: updated,
+    );
+  }
 
   factory SyncResult.failed() => const SyncResult._(
         'failed',
@@ -93,7 +105,9 @@ class UpdateService {
       final terms = await _fetchTerms(httpClient);
 
       onProgress?.call('正在更新数据库...');
-      final added = await _applyIncremental(terms);
+      final incremental = await _applyIncremental(terms);
+      final added = incremental.$1;
+      final updated = incremental.$2;
 
       await versionDao.save(DictionaryVersion(
         version: remote.version,
@@ -102,7 +116,7 @@ class UpdateService {
         lastCheckTime: now,
       ));
       onProgress?.call('完成。');
-      return SyncResult.updated(remote.version, added);
+      return SyncResult.updated(remote.version, added, updated: updated);
     } on Exception {
       // 网络异常 / 远程不可达 / 数据解析失败：静默降级到本地词库。
       return SyncResult.failed();
@@ -155,21 +169,36 @@ class UpdateService {
     return terms;
   }
 
-  /// 增量更新：仅插入本地不存在的词条，不删除、不覆盖已有词条，
-  /// 因此不会影响收藏、浏览历史等用户数据。
-  Future<int> _applyIncremental(List<Term> remoteTerms) async {
-    if (remoteTerms.isEmpty) return 0;
+  /// 增量更新：
+  /// - 本地不存在的词条 -> 插入；
+  /// - 已存在但内容变化的词条 -> 更新内容并 version +1（旧 AI 缓存失效）；
+  /// - 不删除任何词条，不影响收藏、浏览历史等用户数据。
+  ///
+  /// 返回 (新增数, 内容更新数)。
+  Future<(int, int)> _applyIncremental(List<Term> remoteTerms) async {
+    if (remoteTerms.isEmpty) return (0, 0);
     final termDao = TermDao(database);
     final existing = await termDao.getAll();
-    final existingNames =
-        existing.map((t) => t.englishName.trim().toLowerCase()).toSet();
-    final newTerms = remoteTerms
-        .where((t) => !existingNames.contains(t.englishName.trim().toLowerCase()))
-        .toList();
+    final existingByLower = {
+      for (final t in existing) t.englishName.trim().toLowerCase(): t,
+    };
+    final newTerms = <Term>[];
+    var updated = 0;
+    for (final term in remoteTerms) {
+      final key = term.englishName.trim().toLowerCase();
+      final current = existingByLower[key];
+      if (current == null) {
+        newTerms.add(term);
+      } else if (await termDao.updateContentIfChanged(current, term)) {
+        updated++;
+      }
+    }
+    var added = 0;
     if (newTerms.isNotEmpty) {
       await termDao.insertAll(newTerms);
+      added = newTerms.length;
     }
-    return newTerms.length;
+    return (added, updated);
   }
 }
 

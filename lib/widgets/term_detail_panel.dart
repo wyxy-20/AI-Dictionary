@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../models/term.dart';
 import '../providers/dictionary_provider.dart';
+import '../services/ai/ai_service.dart';
+import 'ai_explanation_dialog.dart';
 import 'difficulty_stars.dart';
 import 'empty_state.dart';
 
@@ -170,7 +172,7 @@ class TermDetailPanel extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () => _showAiExplain(context, provider, term),
                 icon: const Icon(Icons.auto_awesome_rounded, size: 17),
-                label: const Text('AI 解释（即将上线）'),
+                label: const Text('AI 解释'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -190,35 +192,54 @@ class TermDetailPanel extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const AiLoadingDialog(label: '正在生成AI解释...'),
     );
-    final answer = await provider.aiService.explainTerm(term.englishName);
-    if (context.mounted) Navigator.of(context).pop();
+
+    String? content;
+    String? error;
+    try {
+      content = await provider.explainTerm(term);
+    } on AiConfigException catch (e) {
+      error = e.message;
+    } on AiTimeoutException catch (e) {
+      error = e.message;
+    } on AiNetworkException catch (e) {
+      error = e.message;
+    } on AiEmptyResponseException catch (e) {
+      error = e.message;
+    } on Exception {
+      error = 'AI 解释生成失败，请稍后重试。';
+    }
+
+    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
     if (!context.mounted) return;
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.auto_awesome_rounded, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 8),
-            Text('AI 解释 · ${term.englishName}'),
+
+    if (error != null) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.auto_awesome_rounded, size: 20),
+              SizedBox(width: 8),
+              Text('AI 解释'),
+            ],
+          ),
+          content: Text(error!),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('知道了'),
+            ),
           ],
         ),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SelectableText(
-            answer,
-            style: const TextStyle(fontSize: 14, height: 1.6),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('知道了'),
-          ),
-        ],
-      ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AiExplanationDialog(term: term, content: content!),
     );
   }
 
