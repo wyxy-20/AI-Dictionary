@@ -1,0 +1,145 @@
+[
+  {
+    "english_name": "Inference",
+    "chinese_name": "推理",
+    "category": "推理与部署",
+    "difficulty": 1,
+    "short_description": "用训练好的模型对新输入做出预测或生成的过程。",
+    "detail_description": "推理指模型部署后对真实输入计算输出的阶段，与训练相对。推理对延迟、吞吐与成本要求高，常用量化、批处理、KV Cache、推理引擎（vLLM、TensorRT）等技术优化。",
+    "application": [
+      "大模型 API 服务与本地部署",
+      "边缘设备的实时预测"
+    ],
+    "related_terms": ["Training", "Quantization", "Forward Pass"]
+  },
+  {
+    "english_name": "Instruction Tuning",
+    "chinese_name": "指令微调",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "用指令-回答数据微调模型，使其遵循人类指令。",
+    "detail_description": "指令微调用大量“指令+正确回答”样本监督微调预训练模型，让模型从“接续文本”变成“听话助手”。InstructGPT 的论文证明，指令微调能显著提升模型遵循指令与有用性，是构建对话助手的关键步骤。",
+    "application": [
+      "ChatGPT 等对话助手训练",
+      "模型从 Base 到 Chat 的转换"
+    ],
+    "related_terms": ["Fine-tuning", "RLHF", "InstructGPT"]
+  },
+  {
+    "english_name": "Interpretability",
+    "chinese_name": "可解释性",
+    "category": "评估与评测",
+    "difficulty": 2,
+    "short_description": "理解模型内部机制与决策原因的能力。",
+    "detail_description": "可解释性研究模型“为什么这么判断”，方法包括注意力可视化、激活探针、特征归因、电路分析等。对高风险领域与监管合规至关重要，也有助于发现模型缺陷与偏见。",
+    "application": [
+      "模型调试与偏见检测",
+      "医疗、金融等领域的监管解释"
+    ],
+    "related_terms": ["XAI", "Black-box Model", "Explainable AI"]
+  },
+  {
+    "english_name": "Image Classification",
+    "chinese_name": "图像分类",
+    "category": "计算机视觉",
+    "difficulty": 1,
+    "short_description": "把整张图像划分到预定义类别中的计算机视觉任务。",
+    "detail_description": "图像分类是 CV 最基础的任务：输入图像，输出所属类别（猫、狗、车型等）。ImageNet 数据集与 AlexNet、ResNet、ViT 等模型推动其精度大幅提升，是许多视觉应用（搜索、质检）的基础。",
+    "application": [
+      "商品识别与图片搜索",
+      "医学影像分类与质检"
+    ],
+    "related_terms": ["CNN", "Computer Vision", "ViT"]
+  },
+  {
+    "english_name": "Image Segmentation",
+    "chinese_name": "图像分割",
+    "category": "计算机视觉",
+    "difficulty": 2,
+    "short_description": "把图像像素划分到不同类别或对象的视觉任务。",
+    "detail_description": "图像分割分为语义分割（像素级类别，如道路/车辆/天空）与实例分割（区分同一类别的不同个体）。U-Net、Mask R-CNN 是代表模型，广泛用于自动驾驶、医学影像与工业检测。",
+    "application": [
+      "自动驾驶场景理解",
+      "医学影像器官与病灶分割"
+    ],
+    "related_terms": ["CNN", "U-Net", "Computer Vision"]
+  },
+  {
+    "english_name": "Imitation Learning",
+    "chinese_name": "模仿学习",
+    "category": "强化学习",
+    "difficulty": 3,
+    "short_description": "通过模仿专家示范来学习策略的方法。",
+    "detail_description": "模仿学习从专家演示中学习“怎么做”，包括行为克隆（直接监督学习映射）与逆强化学习（从示范推断奖励）。它比强化学习更易启动，但受限于示范质量与覆盖度，常与强化学习结合使用。",
+    "application": [
+      "机器人操作技能学习",
+      "自动驾驶行为学习与游戏 AI"
+    ],
+    "related_terms": ["Reinforcement Learning", "Behavior Cloning", "Policy"]
+  },
+  {
+    "english_name": "In-context Learning",
+    "chinese_name": "上下文学习",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "不更新权重，仅靠提示词中的示例让模型学会新任务。",
+    "detail_description": "上下文学习是大模型的涌现能力：在提示中放入几个任务示例（Few-shot），模型即可模仿完成同类任务，参数不变。它与微调的本质区别是不改权重，因此灵活、低成本的适配方式。",
+    "application": [
+      "Few-shot 提示完成任务适配",
+      "零成本快速试错与原型验证"
+    ],
+    "related_terms": ["Few-shot Learning", "Zero-shot Learning", "Prompt"]
+  },
+  {
+    "english_name": "Intent Recognition",
+    "chinese_name": "意图识别",
+    "category": "NLP 自然语言处理",
+    "difficulty": 2,
+    "short_description": "判断用户输入背后的意图或目的的 NLP 任务。",
+    "detail_description": "意图识别把用户话语分类到预定义意图（查天气、订票、退货），是对话系统与客服机器人理解用户的第一步，常与槽位填充（提取参数）配合。大模型时代可直接由 LLM 完成或生成训练数据。",
+    "application": [
+      "智能客服与语音助手",
+      "对话系统流程路由"
+    ],
+    "related_terms": ["NLP", "Chatbot", "Slot Filling"]
+  },
+  {
+    "english_name": "Information Retrieval",
+    "chinese_name": "信息检索",
+    "category": "RAG 与检索",
+    "difficulty": 2,
+    "short_description": "从大规模文档集合中找到与查询相关的内容的技术。",
+    "detail_description": "信息检索（IR）研究如何从文档集合中返回相关结果，经典方法有 BM25 词法检索，现代方法结合向量语义检索与重排序。它是搜索引擎与 RAG 系统的核心组件。",
+    "application": [
+      "搜索引擎与站内搜索",
+      "RAG 知识库检索环节"
+    ],
+    "related_terms": ["RAG", "Semantic Search", "Reranker"]
+  },
+  {
+    "english_name": "Inductive Bias",
+    "chinese_name": "归纳偏置",
+    "category": "机器学习",
+    "difficulty": 3,
+    "short_description": "模型结构或算法内置的、关于任务空间的先验假设。",
+    "detail_description": "归纳偏置是模型对“什么解更合理”的预设：CNN 假设局部性与平移不变性，RNN 假设时序依赖，Transformer 假设全局注意力。恰当的归纳偏置能提升样本效率，错配则限制表达能力。",
+    "application": [
+      "网络结构选型（CNN vs ViT）",
+      "理解不同模型的数据效率差异"
+    ],
+    "related_terms": ["CNN", "Transformer", "Prior Knowledge"]
+  },
+  {
+    "english_name": "InstructGPT",
+    "chinese_name": "InstructGPT",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "OpenAI 通过指令微调与 RLHF 让 GPT-3 学会遵循指令的模型。",
+    "detail_description": "InstructGPT 是 ChatGPT 的技术前身：论文《Training language models to follow instructions with human feedback》提出用人类反馈（指令微调 + RLHF）训练 GPT-3，显著提升有用性、真实性与无害性，奠定现代对齐方法基础。",
+    "application": [
+      "对话助手对齐技术研究",
+      "RLHF 流程的经典参考实现"
+    ],
+    "related_terms": ["Instruction Tuning", "RLHF", "GPT"]
+  }
+]

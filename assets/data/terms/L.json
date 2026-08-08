@@ -1,0 +1,249 @@
+[
+  {
+    "english_name": "LLM",
+    "chinese_name": "大语言模型",
+    "category": "大语言模型",
+    "difficulty": 1,
+    "short_description": "在海量文本上预训练、擅长理解与生成语言的大规模神经网络。",
+    "detail_description": "大语言模型（Large Language Model）以 Transformer 为架构，在数万亿 Token 文本上预训练，具备理解、生成、推理、编程等多能力。GPT、Claude、Gemini、DeepSeek 都是 LLM。它是当前生成式 AI 浪潮的核心。",
+    "application": [
+      "对话助手、写作与翻译",
+      "Agent、代码生成与多模态应用底座"
+    ],
+    "related_terms": ["Transformer", "GPT", "Pre-training", "Token"]
+  },
+  {
+    "english_name": "LangChain",
+    "chinese_name": "LangChain",
+    "category": "工具与框架",
+    "difficulty": 2,
+    "short_description": "用于构建大模型应用的流行开源框架。",
+    "detail_description": "LangChain 提供模型调用抽象、提示模板、链（Chain）、记忆、工具与 RAG 组件，帮助开发者快速组装 LLM 应用。它催生了庞大的生态，后来 Agent 编排进一步演进为 LangGraph。",
+    "application": [
+      "RAG 问答与文档分析应用",
+      "LLM 应用原型与集成"
+    ],
+    "related_terms": ["LangGraph", "RAG", "Agent", "LLM"]
+  },
+  {
+    "english_name": "LangGraph",
+    "chinese_name": "LangGraph",
+    "category": "工具与框架",
+    "difficulty": 2,
+    "short_description": "以图结构编排 Agent 状态与流程的框架。",
+    "detail_description": "LangGraph 把 Agent 流程建模为状态图：节点是步骤（调用模型、工具、人审），边是状态转移，支持循环、条件分支与持久化。相比 LangChain 的线性链，它更适合复杂、可维护的 Agent 应用。",
+    "application": [
+      "多步骤 Agent 工作流",
+      "带人审与重试的复杂任务编排"
+    ],
+    "related_terms": ["LangChain", "Agent", "State Machine"]
+  },
+  {
+    "english_name": "Learning Rate",
+    "chinese_name": "学习率",
+    "category": "模型训练",
+    "difficulty": 1,
+    "short_description": "控制每次参数更新步长的超参数。",
+    "detail_description": "学习率决定梯度下降每次沿负梯度方向走多远。过大导致震荡不收敛，过小则收敛缓慢甚至陷入局部最优。常用策略包括预热、余弦退火、按轮衰减等学习率调度。",
+    "application": [
+      "训练收敛控制",
+      "大模型训练的学习率调度"
+    ],
+    "related_terms": ["Gradient Descent", "Learning Rate Scheduler", "Hyperparameter"]
+  },
+  {
+    "english_name": "Learning Rate Scheduler",
+    "chinese_name": "学习率调度器",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "按训练进度动态调整学习率的策略。",
+    "detail_description": "学习率调度器在训练过程中调整学习率，常见策略包括线性/余弦衰减、步进衰减、预热后衰减与 ReduceLROnPlateau。合理调度能加速收敛并提升最终性能，大模型训练常配合 Warmup。",
+    "application": [
+      "训练超参数优化",
+      "大模型预训练与微调"
+    ],
+    "related_terms": ["Learning Rate", "Warmup", "Training"]
+  },
+  {
+    "english_name": "Loss Function",
+    "chinese_name": "损失函数",
+    "category": "模型训练",
+    "difficulty": 1,
+    "short_description": "量化模型预测与真实目标差距的函数，训练优化的目标。",
+    "detail_description": "损失函数衡量预测与真实的差异，训练就是最小化损失。回归常用均方误差（MSE），分类与语言模型常用交叉熵，生成模型还有各自的特殊损失。损失设计直接影响模型学习方向。",
+    "application": [
+      "训练目标定义",
+      "模型迭代与调优"
+    ],
+    "related_terms": ["Cross-Entropy Loss", "Gradient Descent", "Objective Function"]
+  },
+  {
+    "english_name": "Logistic Regression",
+    "chinese_name": "逻辑回归",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "用 Sigmoid 函数输出类别概率的线性分类模型。",
+    "detail_description": "逻辑回归对线性组合施加 Sigmoid，输出属于某类的概率，用交叉熵损失训练。尽管名字带“回归”，它是分类模型，简单、可解释、训练快，常用于基线模型与风控评分卡。",
+    "application": [
+      "二分类基线模型",
+      "信用评分、疾病概率预测"
+    ],
+    "related_terms": ["Linear Regression", "Softmax", "Classification"]
+  },
+  {
+    "english_name": "Linear Regression",
+    "chinese_name": "线性回归",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "用线性函数拟合输入与连续输出关系的模型。",
+    "detail_description": "线性回归学习特征与连续目标之间的线性关系 y = wx + b，用最小二乘或梯度下降求解。它是统计学习与机器学习的基础，简单、可解释，也是许多复杂模型的特例。",
+    "application": [
+      "房价、销量等连续值预测",
+      "趋势分析与基线模型"
+    ],
+    "related_terms": ["Logistic Regression", "Regression", "Gradient Descent"]
+  },
+  {
+    "english_name": "Label",
+    "chinese_name": "标签",
+    "category": "数据工程",
+    "difficulty": 1,
+    "short_description": "监督学习中样本对应的正确答案或类别标记。",
+    "detail_description": "标签（Label）是监督学习数据中每个样本的期望输出，如邮件是否为垃圾、图片中是猫还是狗。标签质量决定模型上限，获取标签的成本是 AI 项目的主要开销之一。",
+    "application": [
+      "监督学习训练数据",
+      "模型评估的参考答案"
+    ],
+    "related_terms": ["Ground Truth", "Data Annotation", "Supervised Learning"]
+  },
+  {
+    "english_name": "Latent Space",
+    "chinese_name": "潜空间",
+    "category": "生成式 AI",
+    "difficulty": 3,
+    "short_description": "模型内部压缩表示构成的低维空间，控制生成的关键。",
+    "detail_description": "潜空间是模型把输入压缩成的隐向量所在空间，编码了数据的关键特征。扩散模型在潜空间做加噪去噪（Latent Diffusion），因此能高效生成高清图像；在潜空间插值可平滑变换生成内容。",
+    "application": [
+      "Stable Diffusion 的潜空间扩散",
+      "生成内容的插值、编辑与控制"
+    ],
+    "related_terms": ["Autoencoder", "VAE", "Diffusion", "Embedding"]
+  },
+  {
+    "english_name": "Latent Diffusion",
+    "chinese_name": "潜空间扩散",
+    "category": "生成式 AI",
+    "difficulty": 3,
+    "short_description": "先在压缩潜空间执行扩散过程再解码生成图像的技术。",
+    "detail_description": "Latent Diffusion 先用自编码器把图像压缩到低维潜空间，再在潜空间训练扩散模型，大幅降低计算成本、支持更高分辨率。Stable Diffusion 正是基于该技术，成为开源文生图的事实标准。",
+    "application": [
+      "Stable Diffusion 文生图/图生图",
+      "高分辨率图像与视频生成"
+    ],
+    "related_terms": ["Diffusion", "Latent Space", "Stable Diffusion"]
+  },
+  {
+    "english_name": "Long-Term Memory",
+    "chinese_name": "长期记忆",
+    "category": "AI Agent",
+    "difficulty": 2,
+    "short_description": "Agent 跨会话保存与检索经验、知识的能力。",
+    "detail_description": "在 Agent 架构中，长期记忆把重要信息（用户偏好、事实、历史经验）持久化存储（数据库、向量库、文件），在需要时检索注入上下文。它与短期记忆（当前对话）配合，让 Agent 更像“有记忆的助手”。",
+    "application": [
+      "个人助理的跨会话记忆",
+      "Agent 持续学习与知识积累"
+    ],
+    "related_terms": ["Memory", "Agent", "Vector Database"]
+  },
+  {
+    "english_name": "LoRA",
+    "chinese_name": "低秩适配",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "冻结原模型、仅训练低秩矩阵的参数高效微调方法。",
+    "detail_description": "LoRA（Low-Rank Adaptation）把权重更新分解为两个低秩矩阵，冻结原参数只训练新增部分，参数量减少到千分之一量级，显著降低显存与存储成本。它是开源模型微调的主流方法，常与量化结合（QLoRA）。",
+    "application": [
+      "大模型领域微调",
+      "消费级显卡上的模型适配"
+    ],
+    "related_terms": ["PEFT", "QLoRA", "Fine-tuning"]
+  },
+  {
+    "english_name": "Long Context",
+    "chinese_name": "长上下文",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "模型单次处理超长输入（数万到百万 Token）的能力。",
+    "detail_description": "长上下文指模型能够处理的输入序列远超常规，如一次性读完整本小说或整个代码库。它依赖 Flash Attention、RoPE 外推等技术，也带来“大海捞针”式评测与注意力退化等新问题。",
+    "application": [
+      "整本书/长报告分析",
+      "大型代码库理解与 Agent 长任务"
+    ],
+    "related_terms": ["Context Window", "Flash Attention", "Token"]
+  },
+  {
+    "english_name": "Local Model",
+    "chinese_name": "本地模型",
+    "category": "推理与部署",
+    "difficulty": 1,
+    "short_description": "部署在本机或私有服务器上运行的开源模型。",
+    "detail_description": "本地模型指通过 Ollama、LM Studio 等工具在本机运行的开源模型（Llama、Qwen、DeepSeek 等）。优势是数据私密、离线可用、无按量费用，性能受硬件限制，通常配合量化运行。",
+    "application": [
+      "离线与隐私敏感场景",
+      "本地开发调试与低成本部署"
+    ],
+    "related_terms": ["Open Source Model", "Quantization", "Ollama"]
+  },
+  {
+    "english_name": "LSTM",
+    "chinese_name": "长短期记忆网络",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "通过门控机制缓解长序列梯度问题的循环神经网络。",
+    "detail_description": "LSTM（Long Short-Term Memory）用输入门、遗忘门、输出门控制信息流动，能记忆长时间依赖，曾是序列建模（翻译、语音）的主流。Transformer 的注意力机制出现后逐渐取代其主导地位，但 LSTM 思想仍在延续。",
+    "application": [
+      "早期机器翻译与语音识别",
+      "时间序列预测"
+    ],
+    "related_terms": ["RNN", "Transformer", "Sequence Modeling"]
+  },
+  {
+    "english_name": "Logits",
+    "chinese_name": "逻辑值",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "模型输出层未经 Softmax 归一化的原始分数。",
+    "detail_description": "Logits 是模型最后一层对每个候选 Token/类别输出的原始分值，经 Softmax 变成概率后再采样。温度、Top-K、Top-P 等采样参数都作用于 Logits，直接操控生成行为。",
+    "application": [
+      "语言模型采样与解码",
+      "分类模型输出分析"
+    ],
+    "related_terms": ["Softmax", "Temperature", "Sampling"]
+  },
+  {
+    "english_name": "Leaderboard",
+    "chinese_name": "排行榜",
+    "category": "评估与评测",
+    "difficulty": 1,
+    "short_description": "按统一评测指标对模型能力排序的公开榜单。",
+    "detail_description": "排行榜（如 LMArena、Open LLM Leaderboard）用标准测试集或人类盲评对模型打分排序，方便用户对比选型。榜单结果受评测集与协议影响，需结合具体业务场景解读。",
+    "application": [
+      "模型选型与行业对比",
+      "开源模型能力跟踪"
+    ],
+    "related_terms": ["Benchmark", "Evaluation", "Metric"]
+  },
+  {
+    "english_name": "Lifelong Learning",
+    "chinese_name": "终身学习",
+    "category": "机器学习",
+    "difficulty": 3,
+    "short_description": "模型持续从新数据学习而不遗忘旧知识的学习范式。",
+    "detail_description": "终身学习（持续学习）研究模型在连续任务流中不断学习，同时避免灾难性遗忘（学新忘旧）。常用技术包括经验回放、正则化约束、参数隔离等。它是 AI 逼近人类持续学习能力的重要方向。",
+    "application": [
+      "增量学习与在线模型更新",
+      "机器人持续技能习得"
+    ],
+    "related_terms": ["Online Learning", "Catastrophic Forgetting", "Transfer Learning"]
+  }
+]

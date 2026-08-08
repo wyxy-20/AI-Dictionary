@@ -1,0 +1,210 @@
+[
+  {
+    "english_name": "GAN",
+    "chinese_name": "生成对抗网络",
+    "category": "生成式 AI",
+    "difficulty": 3,
+    "short_description": "由生成器与判别器相互博弈来生成逼真数据的模型。",
+    "detail_description": "GAN（Generative Adversarial Network）由生成器（造假者）与判别器（鉴定者）组成，生成器努力生成以假乱真的样本，判别器努力区分真假，二者对抗训练共同提升。GAN 曾主导图像生成（StyleGAN），如今扩散模型成为主流，但 GAN 思想仍广泛使用。",
+    "application": [
+      "人脸生成、图像超分辨率",
+      "风格迁移与数据增强"
+    ],
+    "related_terms": ["Generator", "Discriminator", "Diffusion", "Deepfake"]
+  },
+  {
+    "english_name": "GPU",
+    "chinese_name": "图形处理器",
+    "category": "硬件与算力",
+    "difficulty": 1,
+    "short_description": "拥有数千并行核心、适合大规模矩阵运算的处理器，AI 算力核心。",
+    "detail_description": "GPU 最初为图形渲染设计，其大规模并行架构恰好契合深度学习的矩阵运算，被广泛用于模型训练与推理。NVIDIA 的 CUDA 生态让 GPU 成为 AI 基础设施的代名词，H100、A100 等是训练大模型的主力。",
+    "application": [
+      "深度学习训练与推理",
+      "高性能计算与渲染"
+    ],
+    "related_terms": ["CUDA", "TPU", "Distributed Training"]
+  },
+  {
+    "english_name": "GPT",
+    "chinese_name": "生成式预训练 Transformer",
+    "category": "大语言模型",
+    "difficulty": 1,
+    "short_description": "OpenAI 的生成式预训练 Transformer 模型系列。",
+    "detail_description": "GPT（Generative Pre-trained Transformer）是 OpenAI 的大模型系列，采用自回归方式预训练“下一个词预测”。从 GPT-1 到 GPT-4、o 系列，规模与能力持续跃升，ChatGPT 使其成为生成式 AI 的代名词。",
+    "application": [
+      "ChatGPT 与各类 AI 助手",
+      "写作、编程、推理与多模态理解"
+    ],
+    "related_terms": ["ChatGPT", "OpenAI", "Transformer", "Pre-training"]
+  },
+  {
+    "english_name": "Gemini",
+    "chinese_name": "Gemini",
+    "category": "工具与应用",
+    "difficulty": 1,
+    "short_description": "Google DeepMind 开发的原生多模态大模型系列。",
+    "detail_description": "Gemini 是 Google 的旗舰大模型系列（Gemini 1.0 到 2.x），原生支持文本、图像、音频、视频等多模态输入，并深度集成于 Google 搜索、Workspace 与 Android。它以超长上下文与多模态理解能力著称。",
+    "application": [
+      "多模态理解与生成",
+      "Google 生态（搜索、办公、手机）的 AI 能力"
+    ],
+    "related_terms": ["Multimodal", "Google", "LLM", "Long Context"]
+  },
+  {
+    "english_name": "Generative AI",
+    "chinese_name": "生成式人工智能",
+    "category": "生成式 AI",
+    "difficulty": 1,
+    "short_description": "能够创造文本、图像、音频、视频等新内容的 AI 技术。",
+    "detail_description": "生成式 AI 指以生成为核心能力的 AI：输入提示词或条件，输出全新的文本、图片、音乐、视频或代码。代表技术包括大语言模型（GPT、Claude）、扩散模型（Stable Diffusion、Sora）。它是当前 AI 产业最活跃的方向。",
+    "application": [
+      "内容创作、办公与设计",
+      "代码生成、虚拟数字人与影视制作"
+    ],
+    "related_terms": ["LLM", "Diffusion", "Text-to-Image", "GPT"]
+  },
+  {
+    "english_name": "Gradient Descent",
+    "chinese_name": "梯度下降",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "沿损失函数梯度反方向迭代更新参数以最小化损失的优化算法。",
+    "detail_description": "梯度下降通过反复计算损失对参数的梯度，并沿负梯度方向更新参数，逐步逼近最优解。根据每次使用的样本量分为批量、随机（SGD）与小批量梯度下降。它是所有神经网络训练的基础。",
+    "application": [
+      "模型参数优化",
+      "深度学习训练的通用引擎"
+    ],
+    "related_terms": ["Learning Rate", "Adam Optimizer", "Backpropagation"]
+  },
+  {
+    "english_name": "Gradient",
+    "chinese_name": "梯度",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "损失函数对参数的变化率向量，指示参数应如何调整。",
+    "detail_description": "梯度是损失函数对每个参数的偏导数构成的向量，指向损失上升最快的方向。梯度下降沿负梯度方向更新参数，让损失下降。梯度消失/爆炸是深层网络训练的经典难题。",
+    "application": [
+      "优化算法的核心输入",
+      "梯度裁剪、梯度累积等技术"
+    ],
+    "related_terms": ["Gradient Descent", "Gradient Clipping", "Backpropagation"]
+  },
+  {
+    "english_name": "Gradient Accumulation",
+    "chinese_name": "梯度累积",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "多次前反向传播累积梯度后再更新参数，等效扩大批大小。",
+    "detail_description": "梯度累积先把多个小批次的梯度累加，达到目标步数后再执行一次参数更新，从而在不增加显存的情况下模拟更大的批大小。它是大模型训练与微调处理显存受限的常用技巧。",
+    "application": [
+      "大模型在有限显存下的训练",
+      "微调时等效扩大 Batch Size"
+    ],
+    "related_terms": ["Batch Size", "Gradient", "Fine-tuning"]
+  },
+  {
+    "english_name": "Gradient Clipping",
+    "chinese_name": "梯度裁剪",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "把梯度限制在合理范围，防止梯度爆炸的训练技巧。",
+    "detail_description": "梯度裁剪按范数或逐元素限制梯度大小，避免极端梯度导致参数剧烈震荡或训练发散，常用于 RNN 与大模型训练。它是稳定训练的常见保护机制。",
+    "application": [
+      "RNN 与 Transformer 训练稳定化",
+      "大模型微调的默认保护手段"
+    ],
+    "related_terms": ["Gradient", "Training", "Learning Rate"]
+  },
+  {
+    "english_name": "Generalization",
+    "chinese_name": "泛化",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "模型对未见过的数据做出正确预测的能力。",
+    "detail_description": "泛化是机器学习的终极目标：模型不仅要记住训练数据，还要在新数据上表现良好。训练误差低但测试误差高即过拟合（泛化差）。提升泛化靠更多优质数据、正则化、数据增强与合适的模型复杂度。",
+    "application": [
+      "模型评估的核心关注点",
+      "过拟合治理与模型部署决策"
+    ],
+    "related_terms": ["Overfitting", "Regularization", "Test Set"]
+  },
+  {
+    "english_name": "Ground Truth",
+    "chinese_name": "真实标签",
+    "category": "数据工程",
+    "difficulty": 1,
+    "short_description": "训练与评估使用的、公认正确的标注结果。",
+    "detail_description": "Ground Truth 指样本的真实正确答案或客观事实，监督学习用它计算损失、评估模型。数据集质量取决于 Ground Truth 的准确性，标注错误会直接污染模型效果。",
+    "application": [
+      "监督学习损失计算",
+      "模型评测的参考答案"
+    ],
+    "related_terms": ["Label", "Dataset", "Data Annotation"]
+  },
+  {
+    "english_name": "GNN",
+    "chinese_name": "图神经网络",
+    "category": "深度学习",
+    "difficulty": 3,
+    "short_description": "直接在图结构数据上学习节点与边表示的神经网络。",
+    "detail_description": "图神经网络（Graph Neural Network）把数据建模为图（节点+边），通过消息传递聚合邻居信息来学习节点表示。GCN、GAT、GraphSAGE 是代表模型，用于社交网络、分子结构、推荐系统等图数据场景。",
+    "application": [
+      "社交网络分析与推荐",
+      "分子性质预测与知识图谱推理"
+    ],
+    "related_terms": ["Knowledge Graph", "Graph", "Representation Learning"]
+  },
+  {
+    "english_name": "Grounding",
+    "chinese_name": "事实锚定 / 接地",
+    "category": "RAG 与检索",
+    "difficulty": 2,
+    "short_description": "让模型回答建立在可验证的事实或外部信息之上，减少幻觉。",
+    "detail_description": "Grounding 指把模型的回答锚定到可信来源（文档、数据库、实时数据），常见实现是 RAG：先检索相关资料，再让模型基于资料回答。接地能显著降低幻觉并支持引用溯源。",
+    "application": [
+      "企业知识库问答与引用标注",
+      "实时数据问答（天气、股价）"
+    ],
+    "related_terms": ["RAG", "Hallucination", "Retrieval"]
+  },
+  {
+    "english_name": "Guardrails",
+    "chinese_name": "安全护栏",
+    "category": "AI 伦理与安全",
+    "difficulty": 2,
+    "short_description": "约束 AI 输入输出、防止越界行为的安全机制。",
+    "detail_description": "Guardrails 是围绕 AI 系统设置的安全控制：输入侧过滤恶意提示（提示注入、越狱）、输出侧检查敏感内容、运行时限制工具权限。它们与模型对齐训练互补，共同保障 AI 应用合规与安全。",
+    "application": [
+      "大模型应用的内容安全审查",
+      "Agent 工具调用权限控制"
+    ],
+    "related_terms": ["Alignment", "Prompt Injection", "Jailbreak"]
+  },
+  {
+    "english_name": "Greedy Search",
+    "chinese_name": "贪心搜索",
+    "category": "生成式 AI",
+    "difficulty": 2,
+    "short_description": "每一步只选当前概率最高的 Token 的生成解码策略。",
+    "detail_description": "贪心搜索每次生成概率最高的 Token，计算简单、输出确定，但可能陷入局部最优，产生重复或平庸的文本。相比采样，它更适合对确定性要求高、内容不需要多样性的场景。",
+    "application": [
+      "翻译等确定性优先的生成任务",
+      "与其他解码策略对比的基线"
+    ],
+    "related_terms": ["Sampling", "Beam Search", "Decoder"]
+  },
+  {
+    "english_name": "Grid Search",
+    "chinese_name": "网格搜索",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "穷举超参数组合、逐一评估以寻找最优参数的方法。",
+    "detail_description": "网格搜索为每个超参数指定候选值，穷举所有组合并交叉验证评估，选出最优组合。它简单可靠但组合爆炸、成本高，高维场景通常改用随机搜索或贝叶斯优化。",
+    "application": [
+      "小规模模型超参数调优",
+      "机器学习竞赛与实验对比"
+    ],
+    "related_terms": ["Hyperparameter Tuning", "Random Search", "Validation Set"]
+  }
+]

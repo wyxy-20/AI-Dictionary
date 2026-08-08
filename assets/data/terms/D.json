@@ -1,0 +1,249 @@
+[
+  {
+    "english_name": "Deep Learning",
+    "chinese_name": "深度学习",
+    "category": "深度学习",
+    "difficulty": 1,
+    "short_description": "用多层神经网络自动学习数据分层表示的机器学习分支。",
+    "detail_description": "深度学习使用包含多个隐藏层的神经网络，从数据中自动学习从低级到高级的特征表示，无需人工设计特征。它在图像识别、语音识别、自然语言处理等领域取得突破，是现代 AI（包括大模型）的核心技术。",
+    "application": [
+      "图像、语音、文本等大规模模式识别",
+      "大语言模型与生成式 AI 的技术底座"
+    ],
+    "related_terms": ["Machine Learning", "Neural Network", "LLM", "Backpropagation"]
+  },
+  {
+    "english_name": "Diffusion",
+    "chinese_name": "扩散模型",
+    "category": "生成式 AI",
+    "difficulty": 3,
+    "short_description": "通过逐步加噪再学习去噪来生成数据的一类生成模型。",
+    "detail_description": "扩散模型先在前向过程给数据逐步添加噪声直至变成纯噪声，再训练神经网络学习反向去噪过程。生成时从随机噪声出发逐步还原成图像或视频。Stable Diffusion、DALL·E 3 等文生图模型都基于扩散模型。",
+    "application": [
+      "文生图、图生图与图像编辑",
+      "文生视频（Sora、可灵等）与音频生成"
+    ],
+    "related_terms": ["Stable Diffusion", "Denoising", "Text-to-Image", "Latent Space"]
+  },
+  {
+    "english_name": "Dataset",
+    "chinese_name": "数据集",
+    "category": "数据工程",
+    "difficulty": 1,
+    "short_description": "用于训练、验证和测试模型的样本集合。",
+    "detail_description": "数据集由输入样本（及监督任务中的标签）组成，通常划分为训练集、验证集与测试集。数据质量直接决定模型上限：脏数据、偏差数据都会导致模型表现差或产生偏见。数据集的构建与治理是 AI 工程的基石。",
+    "application": [
+      "模型训练与评估",
+      "领域知识库构建（RAG）"
+    ],
+    "related_terms": ["Training Set", "Test Set", "Validation Set", "Data Pipeline"]
+  },
+  {
+    "english_name": "Data Augmentation",
+    "chinese_name": "数据增强",
+    "category": "数据工程",
+    "difficulty": 2,
+    "short_description": "通过对现有样本做变换生成新样本来扩充训练数据。",
+    "detail_description": "数据增强通过对样本进行旋转、裁剪、加噪、同义词替换等变换，创造更多样化的训练数据，提升模型泛化能力与鲁棒性，缓解数据不足与过拟合。多模态场景还会用合成数据与模型生成数据增强。",
+    "application": [
+      "图像分类训练数据扩充",
+      "文本、语音数据扩充与鲁棒性提升"
+    ],
+    "related_terms": ["Training Set", "Overfitting", "Synthetic Data"]
+  },
+  {
+    "english_name": "Data Annotation",
+    "chinese_name": "数据标注",
+    "category": "数据工程",
+    "difficulty": 1,
+    "short_description": "为原始数据添加标签或注释，使其可用于监督学习。",
+    "detail_description": "数据标注是为文本、图像、语音等数据添加标签的过程，如给图片框出物体、给文本标注情感、给对话标注偏好排序。标注质量直接影响模型效果，也是 RLHF 训练中人类反馈的重要来源。",
+    "application": [
+      "监督学习训练数据生产",
+      "RLHF 人类偏好标注"
+    ],
+    "related_terms": ["Dataset", "Supervised Learning", "RLHF"]
+  },
+  {
+    "english_name": "Data Pipeline",
+    "chinese_name": "数据流水线",
+    "category": "数据工程",
+    "difficulty": 2,
+    "short_description": "从采集、清洗到加工的数据自动化处理流程。",
+    "detail_description": "数据流水线把数据从源头抽取，经过清洗、转换、去重、过滤等步骤，最终送入训练或分析系统，通常用调度工具（如 Airflow）自动化运行。一个稳定可靠的数据流水线是高质量模型训练的前提。",
+    "application": [
+      "大模型预训练数据生产",
+      "业务数据仓库与特征工程"
+    ],
+    "related_terms": ["Dataset", "ETL", "Big Data"]
+  },
+  {
+    "english_name": "Data Drift",
+    "chinese_name": "数据漂移",
+    "category": "机器学习",
+    "difficulty": 3,
+    "short_description": "模型输入数据的分布随时间发生变化的现象。",
+    "detail_description": "数据漂移指生产环境输入分布与训练分布不一致，例如新用户群体、季节变化或采集设备更换。它会导致模型表现下降，需要通过分布监测（如 PSI 指标）及时发现并触发重训。",
+    "application": [
+      "线上模型监控与告警",
+      "模型定期重训触发机制"
+    ],
+    "related_terms": ["Concept Drift", "Model Registry", "Evaluation"]
+  },
+  {
+    "english_name": "Dropout",
+    "chinese_name": "随机失活",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "训练时随机丢弃部分神经元防止过拟合的正则化技术。",
+    "detail_description": "Dropout 在每次训练迭代中按概率随机“关闭”一部分神经元，迫使网络学习冗余、鲁棒的特征，相当于集成多个子网络，从而缓解过拟合。推理时不使用 Dropout，或使用缩放后的全网络。",
+    "application": [
+      "全连接网络与 CNN 防过拟合",
+      "Transformer 中的注意力丢弃"
+    ],
+    "related_terms": ["Overfitting", "Regularization", "Neural Network"]
+  },
+  {
+    "english_name": "Decoder",
+    "chinese_name": "解码器",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "把隐表示逐步生成输出序列的模型组件。",
+    "detail_description": "解码器负责把编码后的表示（或自身前文）逐步生成输出。GPT 等大模型是纯解码器结构，逐词预测下一个 Token；Transformer 翻译模型则是编码器-解码器结构。生成时的采样策略也属于解码过程。",
+    "application": [
+      "GPT 类大模型的文本生成",
+      "机器翻译、摘要与语音合成"
+    ],
+    "related_terms": ["Encoder", "Transformer", "Next Token Prediction"]
+  },
+  {
+    "english_name": "Denoising",
+    "chinese_name": "去噪",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "从带噪声的数据中恢复干净信号的过程。",
+    "detail_description": "去噪任务的目标是从含噪输入中还原原始数据，如图像去噪、语音降噪。自编码器与扩散模型都通过学习去噪来理解数据分布：扩散模型的前向加噪与反向去噪过程本质上就是一种去噪学习。",
+    "application": [
+      "图像/音频降噪与修复",
+      "扩散模型训练的核心机制"
+    ],
+    "related_terms": ["Diffusion", "Autoencoder", "Noise"]
+  },
+  {
+    "english_name": "DPO",
+    "chinese_name": "直接偏好优化",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "无需奖励模型即可用偏好数据直接优化策略的对齐方法。",
+    "detail_description": "DPO（Direct Preference Optimization，直接偏好优化）把 RLHF 的奖励建模与策略优化合并为一步：直接用偏好对（好回答/坏回答）构造损失更新模型。它更简单、稳定、省资源，已成为主流开源对齐方法。",
+    "application": [
+      "开源模型的对齐训练",
+      "大模型安全与偏好微调"
+    ],
+    "related_terms": ["RLHF", "Alignment", "Preference Optimization"]
+  },
+  {
+    "english_name": "Distributed Training",
+    "chinese_name": "分布式训练",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "把训练任务拆分到多卡或多机并行执行以加速训练。",
+    "detail_description": "大模型参数与数据量远超单卡显存，需要分布式训练：数据并行（每卡一份模型副本、不同数据）、张量并行（切分层内计算）、流水线并行（按层分阶段）。配合梯度同步与通信优化（NCCL）实现大规模高效训练。",
+    "application": [
+      "大语言模型预训练",
+      "千卡级 AI 集群训练任务"
+    ],
+    "related_terms": ["GPU", "Model Parallelism", "Training"]
+  },
+  {
+    "english_name": "DALL·E",
+    "chinese_name": "DALL·E",
+    "category": "工具与应用",
+    "difficulty": 1,
+    "short_description": "OpenAI 开发的文生图模型系列。",
+    "detail_description": "DALL·E 是 OpenAI 的文本生成图像模型，从 DALL·E 1 到 DALL·E 3 能力不断提升，能理解复杂提示词并生成高质量、语义准确的图像，深度集成在 ChatGPT 中。它与 Stable Diffusion、Midjourney 共同推动了 AI 绘画浪潮。",
+    "application": [
+      "提示词文生图与图像编辑",
+      "设计灵感、插画与营销素材创作"
+    ],
+    "related_terms": ["Text-to-Image", "Diffusion", "OpenAI", "Prompt"]
+  },
+  {
+    "english_name": "Dify",
+    "chinese_name": "Dify",
+    "category": "工具与框架",
+    "difficulty": 1,
+    "short_description": "开源的 LLM 应用开发平台，支持 RAG 与 Agent 编排。",
+    "detail_description": "Dify 提供可视化方式搭建大模型应用，内置模型管理、知识库（RAG）、工作流编排、Agent 与 API 发布能力，支持自托管。它让开发者和企业可以快速把大模型能力落地为业务应用。",
+    "application": [
+      "企业知识库问答系统",
+      "可视化 Agent 工作流与 API 服务"
+    ],
+    "related_terms": ["RAG", "Agent", "LLM", "Coze"]
+  },
+  {
+    "english_name": "Decision Tree",
+    "chinese_name": "决策树",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "以树形规则逐层判断特征进行分类或回归的模型。",
+    "detail_description": "决策树通过一系列 if-then 规则按特征取值把样本划分到叶节点，直观可解释。单个树容易过拟合，因此常用作集成学习的基础模型（随机森林、GBDT）。信息增益、基尼系数等用于选择最优划分特征。",
+    "application": [
+      "可解释性要求高的业务风控",
+      "随机森林与 GBDT 的基础组件"
+    ],
+    "related_terms": ["Random Forest", "Boosting", "Classification"]
+  },
+  {
+    "english_name": "Deepfake",
+    "chinese_name": "深度伪造",
+    "category": "AI 伦理与安全",
+    "difficulty": 2,
+    "short_description": "用深度学习合成的逼真虚假图像、音频或视频。",
+    "detail_description": "Deepfake 利用生成模型（如 GAN、扩散模型）把人物面孔、声音替换到他人身上，真假难辨。它带来娱乐价值，也引发诈骗、诽谤、隐私侵害等风险，催生了检测技术与立法治理需求。",
+    "application": [
+      "影视特效与娱乐内容",
+      "反诈检测、内容真实性验证（需警惕滥用）"
+    ],
+    "related_terms": ["GAN", "Adversarial Example", "AI Ethics"]
+  },
+  {
+    "english_name": "Dimensionality Reduction",
+    "chinese_name": "降维",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "在保留主要信息的前提下降低数据特征维数的技术。",
+    "detail_description": "降维把高维数据映射到低维空间，缓解维度灾难、减少计算量并便于可视化。线性方法有 PCA、LDA，非线性方法有 t-SNE、UMAP，深度学习中的自编码器与 Embedding 也属于降维思想。",
+    "application": [
+      "高维特征可视化（t-SNE/UMAP）",
+      "特征压缩与噪声消除"
+    ],
+    "related_terms": ["Curse of Dimensionality", "Embedding", "PCA"]
+  },
+  {
+    "english_name": "Domain Adaptation",
+    "chinese_name": "域适应",
+    "category": "迁移学习",
+    "difficulty": 3,
+    "short_description": "把模型从源域迁移到分布不同的目标域的技术。",
+    "detail_description": "域适应解决训练数据（源域）与目标场景数据（目标域）分布不一致的问题，通过特征对齐、对抗训练或伪标签等方法让模型在新领域也能表现良好，减少对目标域标注数据的依赖。",
+    "application": [
+      "跨域图像识别（合成图到真实图）",
+      "跨语言、跨设备模型迁移"
+    ],
+    "related_terms": ["Transfer Learning", "Domain", "Generalization"]
+  },
+  {
+    "english_name": "DQN",
+    "chinese_name": "深度 Q 网络",
+    "category": "强化学习",
+    "difficulty": 3,
+    "short_description": "用深度神经网络逼近 Q 值函数的强化学习算法。",
+    "detail_description": "DQN（Deep Q-Network）把深度神经网络与 Q-Learning 结合，用网络预测状态-动作的价值，并通过经验回放与目标网络稳定训练。2013 年 DeepMind 用 DQN 在 Atari 游戏上超越人类，开启了深度强化学习时代。",
+    "application": [
+      "游戏 AI 与机器人控制",
+      "组合优化、推荐决策问题"
+    ],
+    "related_terms": ["Q-Learning", "Reinforcement Learning", "Value Function"]
+  }
+]

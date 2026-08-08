@@ -1,0 +1,28 @@
+[
+  {
+    "english_name": "XGBoost",
+    "chinese_name": "XGBoost",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "极致优化的梯度提升树框架，表格数据竞赛的常胜将军。",
+    "detail_description": "XGBoost（eXtreme Gradient Boosting）对 GBDT 做了工程与算法优化（二阶导数、正则化、并行与剪枝），训练快、精度高、支持缺失值，长期统治 Kaggle 表格类竞赛。",
+    "application": [
+      "风控、广告、销量等表格预测",
+      "机器学习竞赛主力模型"
+    ],
+    "related_terms": ["Boosting", "GBDT", "Decision Tree"]
+  },
+  {
+    "english_name": "XAI",
+    "chinese_name": "可解释 AI",
+    "category": "评估与评测",
+    "difficulty": 2,
+    "short_description": "让 AI 决策透明、可理解的技术与方法集合。",
+    "detail_description": "XAI（Explainable AI）提供解释模型决策的工具：SHAP、LIME 解释特征贡献，注意力可视化与概念探针解释内部机制。它在合规审计、错误排查与用户信任建设上至关重要。",
+    "application": [
+      "高风险决策解释与审计",
+      "模型调试与偏见检测"
+    ],
+    "related_terms": ["Explainable AI", "Interpretability", "SHAP"]
+  }
+]

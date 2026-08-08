@@ -1,0 +1,158 @@
+[
+  {
+    "english_name": "Fine-tuning",
+    "chinese_name": "微调",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "在预训练模型基础上用特定数据继续训练以适应目标任务。",
+    "detail_description": "微调是迁移学习的核心实践：在预训练模型（如 GPT、BERT）基础上，用少量领域数据继续训练，让模型适应特定任务或风格。相比从头训练，它成本低、收敛快。全参数微调与 LoRA 等参数高效微调（PEFT）是两种主要方式。",
+    "application": [
+      "行业模型定制（客服、法律、医疗）",
+      "开源模型的功能与风格适配"
+    ],
+    "related_terms": ["Pre-training", "PEFT", "LoRA", "Transfer Learning"]
+  },
+  {
+    "english_name": "Function Calling",
+    "chinese_name": "函数调用",
+    "category": "AI Agent",
+    "difficulty": 2,
+    "short_description": "让模型按结构化格式请求调用外部函数/工具的机制。",
+    "detail_description": "Function Calling 指模型在对话中输出结构化的函数调用请求（函数名与参数 JSON），由应用执行真实函数并把结果返回给模型。它是 Agent 调用工具、查询数据库、访问 API 的标准方式，也是 MCP 协议的基础能力。",
+    "application": [
+      "Agent 工具调用（搜索、计算、代码执行）",
+      "与业务系统 API 集成"
+    ],
+    "related_terms": ["Tool Calling", "Agent", "MCP", "API"]
+  },
+  {
+    "english_name": "Few-shot Learning",
+    "chinese_name": "少样本学习",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "仅用极少标注样本（如几个示例）完成学习或适配的能力。",
+    "detail_description": "少样本学习研究如何在只有少量样本的情况下学习新任务。大模型通过上下文学习实现“少样本提示”：在提示词里放几个示例，模型就能模仿完成类似任务，无需更新权重。它与 Zero-shot 互补。",
+    "application": [
+      "提示词示例（Few-shot Prompting）",
+      "数据稀缺场景的模型适配"
+    ],
+    "related_terms": ["Zero-shot Learning", "In-context Learning", "Prompt"]
+  },
+  {
+    "english_name": "Feature Engineering",
+    "chinese_name": "特征工程",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "设计、转换和选择对模型学习最有用的输入特征的过程。",
+    "detail_description": "特征工程包括特征提取、构造、选择与缩放，是传统机器学习提升效果的关键。好的特征能显著降低模型复杂度并提升性能；而深度学习与大模型自动学习表示，减少了对人工特征工程的依赖。",
+    "application": [
+      "表格数据建模（风控、广告）",
+      "传统机器学习项目的核心优化点"
+    ],
+    "related_terms": ["Feature Extraction", "Curse of Dimensionality", "Machine Learning"]
+  },
+  {
+    "english_name": "Feature Extraction",
+    "chinese_name": "特征提取",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "从原始数据中提取可用的表示或特征的过程。",
+    "detail_description": "特征提取既包括传统的人工设计特征（SIFT、TF-IDF），也包括深度网络自动学习的分层特征。预训练模型的中间层输出常被作为通用特征用于下游任务，这是迁移学习的重要形式。",
+    "application": [
+      "图像、文本的表示抽取",
+      "预训练模型作为特征提取器"
+    ],
+    "related_terms": ["Feature Engineering", "Backbone", "Embedding"]
+  },
+  {
+    "english_name": "Forward Pass",
+    "chinese_name": "前向传播",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "输入数据按网络层顺序计算得到输出（预测）的过程。",
+    "detail_description": "前向传播是从输入层到输出层的完整计算：每层加权求和、过激活函数，逐层传递，最终得到预测结果。训练时前向传播得出损失，再反向传播计算梯度；推理时只执行前向传播。",
+    "application": [
+      "模型推理（预测）",
+      "训练循环中的损失计算"
+    ],
+    "related_terms": ["Backpropagation", "Neural Network", "Inference"]
+  },
+  {
+    "english_name": "Feedforward Neural Network",
+    "chinese_name": "前馈神经网络",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "数据单向从输入流向输出、无循环连接的神经网络。",
+    "detail_description": "前馈网络是最基础的神经网络结构：数据从输入层经若干隐藏层单向流向输出层。多层感知机（MLP）是其典型代表。Transformer 中的 FFN 层也是前馈结构，负责对注意力输出做非线性变换。",
+    "application": [
+      "多层感知机与基础分类回归",
+      "Transformer 中的 FFN 模块"
+    ],
+    "related_terms": ["Neural Network", "MLP", "Activation Function"]
+  },
+  {
+    "english_name": "Foundation Model",
+    "chinese_name": "基础模型",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "在海量数据上大规模预训练、可适配多种下游任务的通用模型。",
+    "detail_description": "基础模型指在大规模数据上预训练的通用模型（GPT、Claude、Gemini 等），具备广泛知识与能力，通过微调、提示或接口适配就能服务多种任务。它代表了“训练一次、到处使用”的范式转变，也带来算力集中与安全治理议题。",
+    "application": [
+      "多任务适配的通用底座",
+      "行业模型与 Agent 应用的基座"
+    ],
+    "related_terms": ["Base Model", "Pre-training", "LLM", "Scaling Law"]
+  },
+  {
+    "english_name": "Federated Learning",
+    "chinese_name": "联邦学习",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "在不集中原始数据的前提下，多方协作训练模型的技术。",
+    "detail_description": "联邦学习让数据留在各参与方本地，只共享模型梯度或参数更新，由中心服务器聚合，从而在保护隐私的前提下训练全局模型。它广泛应用于医疗、金融等数据敏感领域，但与集中训练相比通信开销较大。",
+    "application": [
+      "医疗数据跨机构协作建模",
+      "手机输入法、键盘预测等端侧学习"
+    ],
+    "related_terms": ["Privacy", "Distributed Training", "Machine Learning"]
+  },
+  {
+    "english_name": "F1 Score",
+    "chinese_name": "F1 分数",
+    "category": "评估与评测",
+    "difficulty": 2,
+    "short_description": "精确率与召回率的调和平均，类别不平衡时的常用指标。",
+    "detail_description": "F1 分数是精确率（Precision）与召回率（Recall）的调和平均，兼顾两者。在类别不平衡（如罕见病检测）场景，F1 比准确率更能反映模型质量。宏平均与微平均用于多分类汇总。",
+    "application": [
+      "分类模型评测（尤其不平衡数据）",
+      "信息检索与异常检测评估"
+    ],
+    "related_terms": ["Precision", "Recall", "Metric"]
+  },
+  {
+    "english_name": "Flash Attention",
+    "chinese_name": "Flash Attention",
+    "category": "推理与部署",
+    "difficulty": 3,
+    "short_description": "通过分块与 IO 优化加速注意力计算的算法实现。",
+    "detail_description": "Flash Attention 在不改变注意力结果的前提下，利用分块计算、内存访问优化与核融合，大幅减少显存占用并提速，让长上下文训练与推理成为可能。它已成为主流框架（PyTorch、vLLM）的默认加速方案。",
+    "application": [
+      "大模型训练与推理加速",
+      "长上下文扩展"
+    ],
+    "related_terms": ["Attention", "GPU", "Inference"]
+  },
+  {
+    "english_name": "Frozen Layers",
+    "chinese_name": "冻结层",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "微调时不更新参数、保持不变的网络层。",
+    "detail_description": "冻结层（Freeze）指训练中停止更新的层，参数保持不变。微调时冻结底层特征提取层可保留通用能力、减少计算与过拟合；大模型参数高效微调（PEFT）往往冻结全部原参数，只训练少量适配模块。",
+    "application": [
+      "迁移学习与微调策略",
+      "LoRA 等 PEFT 方法的基础"
+    ],
+    "related_terms": ["Fine-tuning", "PEFT", "LoRA"]
+  }
+]

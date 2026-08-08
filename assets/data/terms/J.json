@@ -1,0 +1,41 @@
+[
+  {
+    "english_name": "JSON",
+    "chinese_name": "JSON",
+    "category": "工程与开发",
+    "difficulty": 1,
+    "short_description": "轻量、易读的键值对数据交换格式。",
+    "detail_description": "JSON（JavaScript Object Notation）是应用最广的数据交换格式之一，以键值对与嵌套结构组织数据，几乎被所有编程语言支持。AI 领域处处可见 JSON：API 请求响应、模型输出结构化数据、提示词中指定 JSON 输出格式等。",
+    "application": [
+      "API 数据交换与配置文件",
+      "大模型结构化输出（JSON Mode）"
+    ],
+    "related_terms": ["API", "Data", "Structured Output"]
+  },
+  {
+    "english_name": "Jupyter Notebook",
+    "chinese_name": "Jupyter 笔记本",
+    "category": "工具与框架",
+    "difficulty": 1,
+    "short_description": "支持代码、文本、图表混排的交互式编程环境。",
+    "detail_description": "Jupyter Notebook 以“单元格”为单位组合代码、Markdown 说明与可视化结果，支持交互式运行。它是数据科学、机器学习教育与实验的标准工具，也用于展示模型训练与分析过程。",
+    "application": [
+      "数据分析与机器学习实验",
+      "AI 教学与论文复现"
+    ],
+    "related_terms": ["Python", "Data Science", "Kaggle"]
+  },
+  {
+    "english_name": "Jailbreak",
+    "chinese_name": "越狱",
+    "category": "AI 伦理与安全",
+    "difficulty": 2,
+    "short_description": "用精心构造的提示词绕过模型安全限制的行为。",
+    "detail_description": "越狱指通过角色扮演、虚构场景、编码混淆等手段诱导模型突破安全对齐，输出本应拒绝的内容。它是提示注入的近亲，安全研究通过红队测试与护栏迭代来防御。",
+    "application": [
+      "模型安全红队测试",
+      "安全护栏有效性评估"
+    ],
+    "related_terms": ["Prompt Injection", "Guardrails", "Alignment"]
+  }
+]

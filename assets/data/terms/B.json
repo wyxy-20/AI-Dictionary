@@ -1,0 +1,236 @@
+[
+  {
+    "english_name": "Backpropagation",
+    "chinese_name": "反向传播",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "通过链式法则从输出层向输入层逐层计算梯度来更新权重的算法。",
+    "detail_description": "反向传播是训练神经网络的核心算法：先前向计算预测与损失，再利用链式法则反向逐层求出每个权重的梯度，最后用优化器（如 SGD、Adam）更新权重。几乎所有深度学习模型的训练都依赖它。",
+    "application": [
+      "神经网络权重的自动求导与更新",
+      "PyTorch / TensorFlow 自动微分机制的实现基础"
+    ],
+    "related_terms": ["Gradient Descent", "Forward Pass", "Neural Network"]
+  },
+  {
+    "english_name": "Batch Normalization",
+    "chinese_name": "批归一化",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "对一批数据做标准化，加速训练并提升稳定性的技术。",
+    "detail_description": "批归一化在每个小批次内对激活值做均值方差归一化，并学习缩放与平移参数。它能缓解内部协变量偏移，允许使用更大的学习率，加快收敛，并起到一定正则化作用，是 CNN 时代的标配技术。",
+    "application": [
+      "卷积神经网络训练加速",
+      "深层网络稳定性优化"
+    ],
+    "related_terms": ["Normalization", "Mini-batch", "Gradient Descent"]
+  },
+  {
+    "english_name": "Batch Size",
+    "chinese_name": "批大小",
+    "category": "模型训练",
+    "difficulty": 1,
+    "short_description": "每次参数更新所使用的训练样本数量。",
+    "detail_description": "批大小（Batch Size）决定每次迭代用多少个样本计算梯度并更新参数。批大小过小梯度噪声大、不稳定；过大则内存占用高、收敛可能变慢。大模型训练通常结合梯度累积在有限显存下模拟大批量。",
+    "application": [
+      "训练超参数配置",
+      "大模型显存优化（配合梯度累积）"
+    ],
+    "related_terms": ["Mini-batch", "Epoch", "Gradient Accumulation"]
+  },
+  {
+    "english_name": "Bagging",
+    "chinese_name": "袋装法",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "通过有放回抽样训练多个模型并投票/平均来降低方差的集成方法。",
+    "detail_description": "Bagging（Bootstrap Aggregating）对训练集进行多次有放回抽样，分别训练多个模型，再对结果投票（分类）或平均（回归）。随机森林就是决策树上的 Bagging 代表，能有效降低过拟合与方差。",
+    "application": [
+      "随机森林等集成学习模型",
+      "高方差模型的稳定性提升"
+    ],
+    "related_terms": ["Boosting", "Random Forest", "Ensemble Learning"]
+  },
+  {
+    "english_name": "Bayesian Network",
+    "chinese_name": "贝叶斯网络",
+    "category": "机器学习",
+    "difficulty": 3,
+    "short_description": "用有向无环图表示变量间概率依赖关系的模型。",
+    "detail_description": "贝叶斯网络用节点表示随机变量、边表示条件依赖，结合条件概率表描述联合分布，可在部分变量已知时推断其他变量的概率。它适合处理不确定性和因果关系建模，常用于专家系统与风险分析。",
+    "application": [
+      "医疗诊断与故障诊断",
+      "风险预测与因果推断"
+    ],
+    "related_terms": ["Probability", "Knowledge Graph", "Markov Chain"]
+  },
+  {
+    "english_name": "Beam Search",
+    "chinese_name": "束搜索",
+    "category": "生成式 AI",
+    "difficulty": 3,
+    "short_description": "每次保留概率最高的 K 条候选路径进行搜索的解码策略。",
+    "detail_description": "束搜索在序列生成时每一步保留概率最高的 K（束宽）条候选，避免贪心搜索只取最优却丢失全局最优的问题。束宽越大结果通常越好但计算开销越大。它常用于机器翻译等需要高质量输出的场景。",
+    "application": [
+      "机器翻译与摘要生成的解码",
+      "语音识别候选路径搜索"
+    ],
+    "related_terms": ["Sampling", "Nucleus Sampling", "Decoder"]
+  },
+  {
+    "english_name": "Benchmark",
+    "chinese_name": "基准测试",
+    "category": "评估与评测",
+    "difficulty": 1,
+    "short_description": "用于统一衡量和比较模型能力的标准测试集与指标。",
+    "detail_description": "基准测试（Benchmark）是一套标准化任务、数据集和评分指标，用来横向比较不同模型的能力，例如 MMLU、HumanEval、GLUE 等。选择合适基准并正确解读结果，是模型评测与选型的核心环节。",
+    "application": [
+      "大模型能力对比与选型",
+      "学术论文性能报告"
+    ],
+    "related_terms": ["Evaluation", "Metric", "Baseline"]
+  },
+  {
+    "english_name": "BERT",
+    "chinese_name": "BERT",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "Google 提出的基于 Transformer 编码器的双向预训练语言模型。",
+    "detail_description": "BERT（Bidirectional Encoder Representations from Transformers）2018 年由 Google 提出，通过掩码语言建模在双向上下文中预训练，再微调到下游任务，刷新了多项 NLP 记录。它是预训练+微调范式的里程碑，后来才被 GPT 的生成式范式超越。",
+    "application": [
+      "文本分类、问答、实体识别等 NLP 任务",
+      "语义搜索与句子相似度计算"
+    ],
+    "related_terms": ["Transformer", "Pre-training", "Fine-tuning", "NLP"]
+  },
+  {
+    "english_name": "Bias",
+    "chinese_name": "偏差 / 偏见",
+    "category": "AI 伦理与安全",
+    "difficulty": 2,
+    "short_description": "模型系统性偏离真实规律，或数据/模型放大的社会偏见。",
+    "detail_description": "Bias 有两层含义：机器学习中它指模型假设与真实规律之间的系统性误差（与方差权衡）；AI 伦理中它指训练数据或算法带来的性别、种族等歧视性偏见。后者会导致不公平结果，需要数据治理与公平性评测来缓解。",
+    "application": [
+      "模型诊断：偏差-方差权衡分析",
+      "AI 公平性与偏见审计"
+    ],
+    "related_terms": ["Bias-Variance Tradeoff", "AI Ethics", "Fairness"]
+  },
+  {
+    "english_name": "Bias-Variance Tradeoff",
+    "chinese_name": "偏差-方差权衡",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "模型误差中偏差与方差的此消彼长关系。",
+    "detail_description": "泛化误差可分解为偏差（模型过于简单的系统性误差）与方差（模型对数据波动过于敏感）。模型越简单偏差大、方差小；越复杂则相反。训练的目标是在两者间取得平衡，避免欠拟合或过拟合。",
+    "application": [
+      "模型复杂度选择与调优",
+      "理解过拟合与欠拟合的理论基础"
+    ],
+    "related_terms": ["Overfitting", "Underfitting", "Regularization"]
+  },
+  {
+    "english_name": "Big Data",
+    "chinese_name": "大数据",
+    "category": "数据工程",
+    "difficulty": 1,
+    "short_description": "规模巨大、类型多样、增长快速，难以用传统工具处理的数据。",
+    "detail_description": "大数据通常用 4V 描述：Volume（海量）、Velocity（高速）、Variety（多样）、Veracity（真实）。大数据技术与 AI 相辅相成：数据是模型训练的基础，分布式存储与计算（如 Hadoop、Spark）支撑海量数据的处理。",
+    "application": [
+      "数据仓库、实时流处理",
+      "大规模模型训练的数据基础"
+    ],
+    "related_terms": ["Dataset", "Data Pipeline", "Machine Learning"]
+  },
+  {
+    "english_name": "Black-box Model",
+    "chinese_name": "黑盒模型",
+    "category": "评估与评测",
+    "difficulty": 2,
+    "short_description": "内部机制不透明、只能观察输入输出关系的模型。",
+    "detail_description": "黑盒模型指无法直接检查内部决策逻辑的模型，深度神经网络通常被视作黑盒。用户只能通过输入输出行为来理解它，这推动了可解释 AI（XAI）的研究，也带来审计与合规方面的挑战。",
+    "application": [
+      "第三方大模型 API 的接入评估",
+      "可解释性与透明度研究"
+    ],
+    "related_terms": ["XAI", "Interpretability", "LLM"]
+  },
+  {
+    "english_name": "Blockchain",
+    "chinese_name": "区块链",
+    "category": "基础概念",
+    "difficulty": 1,
+    "short_description": "由密码学链接的分布式账本技术，具有去中心化、防篡改特性。",
+    "detail_description": "区块链是把数据打包成区块、以哈希链接并按共识机制追加的分布式账本，各节点共同维护，难以篡改。它支撑了加密货币与智能合约，也和 AI 在数据确权、分布式训练激励等方向产生交叉研究。",
+    "application": [
+      "加密货币与数字资产",
+      "数据溯源、版权确权与去中心化应用"
+    ],
+    "related_terms": ["Data", "Cryptography", "Distributed System"]
+  },
+  {
+    "english_name": "Boosting",
+    "chinese_name": "提升法",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "串行训练弱模型、每个新模型重点纠正前序错误来提升整体性能。",
+    "detail_description": "Boosting 是一种集成学习方法：依次训练弱学习器，每个新模型更关注前序模型犯错的样本，最终加权组合所有模型。AdaBoost、GBDT、XGBoost、LightGBM 都是代表，在表格数据竞赛中常年称霸。",
+    "application": [
+      "Kaggle 表格数据竞赛主流方案",
+      "风控、广告点击率预测等业务建模"
+    ],
+    "related_terms": ["Bagging", "XGBoost", "Ensemble Learning"]
+  },
+  {
+    "english_name": "BPE",
+    "chinese_name": "字节对编码",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "将文本按频率迭代合并为子词单元的常见分词算法。",
+    "detail_description": "BPE（Byte Pair Encoding）先从字符开始，反复把出现频率最高的相邻单元合并成新单元，得到一份子词词典，再把文本切分为子词（Token）。它平衡了词汇表大小与罕见词覆盖，是 GPT 等模型的主流分词方案。",
+    "application": [
+      "大语言模型的分词器构建",
+      "多语言文本的 Token 化处理"
+    ],
+    "related_terms": ["Token", "Tokenizer", "Corpus"]
+  },
+  {
+    "english_name": "Backbone",
+    "chinese_name": "骨干网络",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "负责提取基础特征的主干网络结构。",
+    "detail_description": "在目标检测、分割等任务中，Backbone 是负责从原始输入提取多尺度特征的网络（如 ResNet、ViT），后续的检测头或分割头在其特征上完成具体任务。主干越强，下游任务效果通常越好。",
+    "application": [
+      "目标检测（YOLO 等）与图像分割",
+      "视觉基础模型的特征提取"
+    ],
+    "related_terms": ["CNN", "Feature Extraction", "YOLO"]
+  },
+  {
+    "english_name": "Base Model",
+    "chinese_name": "基座模型",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "在大规模数据上预训练、尚未针对对话微调的基础模型。",
+    "detail_description": "基座模型（Base Model）指完成预训练、具备广泛知识但未做指令对齐的原始模型。它像“刚毕业的毕业生”，能力强但不擅长听话回答；通常需要指令微调与 RLHF 才能变成可用的对话助手。",
+    "application": [
+      "在此基础上做领域微调（垂直行业模型）",
+      "研究模型能力上限与开源生态"
+    ],
+    "related_terms": ["Pre-training", "Fine-tuning", "Foundation Model"]
+  },
+  {
+    "english_name": "Baseline",
+    "chinese_name": "基线",
+    "category": "评估与评测",
+    "difficulty": 1,
+    "short_description": "作为对比起点的参考模型或方法。",
+    "detail_description": "基线（Baseline）是评估新方法时的参照对象，通常是比较简单或业界公认的方法（如随机森林、已有开源模型）。新方法只有明显超过基线才有价值，论文实验也常报告多个基线做对比。",
+    "application": [
+      "模型效果对比与论文实验",
+      "业务建模中的下限评估"
+    ],
+    "related_terms": ["Benchmark", "Ablation Study", "Metric"]
+  }
+]

@@ -1,0 +1,197 @@
+[
+  {
+    "english_name": "RAG",
+    "chinese_name": "检索增强生成",
+    "category": "RAG 与检索",
+    "difficulty": 2,
+    "short_description": "先检索相关资料再让模型基于资料回答，减少幻觉并支持溯源。",
+    "detail_description": "RAG（Retrieval-Augmented Generation）分三步：把知识库文档切块向量化存入向量数据库；收到问题时检索最相关内容；把检索结果连同问题交给大模型生成回答。它让模型使用最新、私有知识，是知识库问答与 Agent 记忆的主流方案。",
+    "application": [
+      "企业知识库问答与客服",
+      "Agent 工具检索与实时信息问答"
+    ],
+    "related_terms": ["Vector Database", "Embedding", "Grounding", "Hallucination"]
+  },
+  {
+    "english_name": "RLHF",
+    "chinese_name": "基于人类反馈的强化学习",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "用人类偏好反馈训练奖励模型再优化策略的对齐方法。",
+    "detail_description": "RLHF（Reinforcement Learning from Human Feedback）分三步：收集人类对回答的偏好标注、训练奖励模型、用强化学习（PPO）优化策略模型。它让模型更符合人类偏好，是 ChatGPT 对齐的核心技术，DPO 等新方法提供了更简单的替代。",
+    "application": [
+      "大模型安全与偏好对齐",
+      "对话助手训练（ChatGPT 等）"
+    ],
+    "related_terms": ["Alignment", "DPO", "Reward Model", "Instruction Tuning"]
+  },
+  {
+    "english_name": "Recall",
+    "chinese_name": "召回率",
+    "category": "评估与评测",
+    "difficulty": 1,
+    "short_description": "所有正样本中被模型正确找出的比例。",
+    "detail_description": "召回率 = 真正例 / (真正例 + 假负例)，衡量“该找的是否都找到”。检索与医疗筛查场景更看重召回（漏报代价高）。它与精确率存在权衡，F1 是其调和平均。",
+    "application": [
+      "分类与检索模型评估",
+      "召回系统与风控"
+    ],
+    "related_terms": ["Precision", "F1 Score", "Metric"]
+  },
+  {
+    "english_name": "Reinforcement Learning",
+    "chinese_name": "强化学习",
+    "category": "强化学习",
+    "difficulty": 2,
+    "short_description": "智能体通过与环境的试错交互最大化累积奖励的学习范式。",
+    "detail_description": "强化学习中，智能体在环境里采取动作、获得奖励、观察新状态，通过策略优化（Q-Learning、PPO 等）学会长期最优行为。它用于游戏、机器人控制，也用于大模型推理与对齐（RLHF、R1）。",
+    "application": [
+      "游戏 AI 与机器人控制",
+      "大模型推理增强与偏好对齐"
+    ],
+    "related_terms": ["Q-Learning", "Reward Model", "RLHF"]
+  },
+  {
+    "english_name": "Regression",
+    "chinese_name": "回归",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "预测连续数值输出的监督学习任务。",
+    "detail_description": "回归预测连续值（房价、温度、销量），线性回归与树模型、神经网络都可实现。评估常用均方误差（MSE）、平均绝对误差（MAE）与 R 方。",
+    "application": [
+      "价格与销量预测",
+      "风险评估与趋势分析"
+    ],
+    "related_terms": ["Linear Regression", "Classification", "Loss Function"]
+  },
+  {
+    "english_name": "Random Forest",
+    "chinese_name": "随机森林",
+    "category": "机器学习",
+    "difficulty": 1,
+    "short_description": "由多棵随机决策树投票集成、抗过拟合的模型。",
+    "detail_description": "随机森林对数据与特征做随机抽样，训练多棵决策树并投票/平均，显著降低单棵树的方差与过拟合，训练快、可并行、支持特征重要性分析，是表格数据的经典强模型。",
+    "application": [
+      "风控、营销等表格建模",
+      "特征重要性分析与稳健基线"
+    ],
+    "related_terms": ["Decision Tree", "Bagging", "Ensemble Learning"]
+  },
+  {
+    "english_name": "Regularization",
+    "chinese_name": "正则化",
+    "category": "模型训练",
+    "difficulty": 2,
+    "short_description": "通过约束模型复杂度防止过拟合的技术。",
+    "detail_description": "正则化给损失增加惩罚项或约束：L1/L2 权重衰减、Dropout、早停、数据增强等。它让模型偏向更简单的解，提升泛化能力，是机器学习工程的基本手段。",
+    "application": [
+      "防过拟合训练",
+      "稀疏模型（L1）与权重约束"
+    ],
+    "related_terms": ["Overfitting", "Dropout", "Weight Decay"]
+  },
+  {
+    "english_name": "RNN",
+    "chinese_name": "循环神经网络",
+    "category": "深度学习",
+    "difficulty": 2,
+    "short_description": "带循环连接、擅长处理序列数据的神经网络。",
+    "detail_description": "RNN（Recurrent Neural Network）按时间步处理序列，用隐藏状态传递历史信息，曾主导机器翻译与语音识别。梯度消失与长依赖问题催生了 LSTM/GRU，最终被注意力机制（Transformer）取代。",
+    "application": [
+      "早期序列建模任务",
+      "时间序列与轻量序列模型"
+    ],
+    "related_terms": ["LSTM", "Transformer", "Sequence Modeling"]
+  },
+  {
+    "english_name": "Reasoning",
+    "chinese_name": "推理能力",
+    "category": "大语言模型",
+    "difficulty": 2,
+    "short_description": "模型进行逻辑推导、数学计算与多步思考的能力。",
+    "detail_description": "推理能力指模型解决需要多步逻辑的任务（数学、代码、规划）。思维链提示可激发推理，o1、DeepSeek-R1 等推理模型通过强化学习在内部“思考”再作答，显著提升复杂推理表现。",
+    "application": [
+      "数学与编程难题",
+      "Agent 规划与决策"
+    ],
+    "related_terms": ["Chain of Thought", "LLM", "Planning"]
+  },
+  {
+    "english_name": "Retrieval",
+    "chinese_name": "检索",
+    "category": "RAG 与检索",
+    "difficulty": 1,
+    "short_description": "从大规模数据中找到与查询相关内容的环节。",
+    "detail_description": "检索是 RAG 与搜索引擎的核心：把查询与候选内容匹配，返回最相关的若干结果。词法检索（BM25）精确快速，向量检索语义强，混合检索取两者之长。检索质量决定生成质量的上限。",
+    "application": [
+      "RAG 召回环节",
+      "搜索引擎与推荐召回"
+    ],
+    "related_terms": ["RAG", "Reranker", "Information Retrieval"]
+  },
+  {
+    "english_name": "Reward Model",
+    "chinese_name": "奖励模型",
+    "category": "模型训练",
+    "difficulty": 3,
+    "short_description": "为模型输出打分的模型，是 RLHF 的关键组件。",
+    "detail_description": "奖励模型从人类偏好数据中学习，为回答质量打分，替代昂贵的人工反馈指导强化学习优化策略。奖励模型存在被“钻空子”（奖励欺骗）的风险，需要持续迭代评测。",
+    "application": [
+      "RLHF 对齐训练",
+      "生成质量自动评估"
+    ],
+    "related_terms": ["RLHF", "Reward Hacking", "Objective Function"]
+  },
+  {
+    "english_name": "Reward Hacking",
+    "chinese_name": "奖励欺骗",
+    "category": "AI 伦理与安全",
+    "difficulty": 3,
+    "short_description": "模型找到最大化奖励指标的捷径却不符合真实意图的现象。",
+    "detail_description": "奖励欺骗指策略模型利用奖励模型的漏洞获得高分，却未真正满足人类意图，例如用冗长话术讨好评分。它是对齐研究的核心难题，需要鲁棒奖励设计、正则化与持续评测来缓解。",
+    "application": [
+      "RLHF 训练质量监控",
+      "对齐与安全研究"
+    ],
+    "related_terms": ["Reward Model", "Alignment", "RLHF"]
+  },
+  {
+    "english_name": "Representation Learning",
+    "chinese_name": "表征学习",
+    "category": "深度学习",
+    "difficulty": 3,
+    "short_description": "自动学习数据的有效数值表示以提升下游任务效果。",
+    "detail_description": "表征学习让模型自动从数据中学习有用表示（Embedding），无需人工设计特征。深度学习、自监督学习与预训练都是表征学习的实践，好表示让分类、检索、生成等任务事半功倍。",
+    "application": [
+      "预训练与迁移学习",
+      "多模态对齐（CLIP）与检索"
+    ],
+    "related_terms": ["Embedding", "Pre-training", "Self-Supervised Learning"]
+  },
+  {
+    "english_name": "Reranker",
+    "chinese_name": "重排序器",
+    "category": "RAG 与检索",
+    "difficulty": 2,
+    "short_description": "对初检结果做精细相关性排序的模型。",
+    "detail_description": "RAG 常用两阶段检索：先用向量/词法快速召回大量候选，再用重排序模型（cross-encoder）对候选精排，取最相关的 Top-K 交给模型。重排序能显著提升检索精度，但计算成本较高。",
+    "application": [
+      "RAG 检索质量优化",
+      "搜索引擎精排"
+    ],
+    "related_terms": ["RAG", "Retrieval", "Semantic Search"]
+  },
+  {
+    "english_name": "Robustness",
+    "chinese_name": "鲁棒性",
+    "category": "机器学习",
+    "difficulty": 2,
+    "short_description": "模型面对噪声、扰动与分布变化时保持稳定表现的能力。",
+    "detail_description": "鲁棒性衡量模型在对抗样本、数据噪声、OOD 输入等不利条件下的可靠性。提升手段包括数据增强、对抗训练、模型集成与输入清洗，对安全关键场景至关重要。",
+    "application": [
+      "对抗样本防御",
+      "生产环境可靠性评估"
+    ],
+    "related_terms": ["Adversarial Example", "OOD", "Generalization"]
+  }
+]
