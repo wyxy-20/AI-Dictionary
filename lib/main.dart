@@ -58,14 +58,33 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
   bool _ready = false;
   String _status = '正在初始化本地词库...';
   String _detail = '';
-  SettingsProvider? _settingsProvider;
-  DictionaryProvider? _dictionaryProvider;
-  AiConfigProvider? _aiConfigProvider;
+
+  // Provider 在 State 创建时即存在，始终处于 MaterialApp 之上，
+  // 因此弹窗 / 对话框也能访问（修复"设置打开无内容"）。
+  late final SettingsProvider _settingsProvider =
+      SettingsProvider(SettingsDao(widget.database));
+  late final AiConfigProvider _aiConfigProvider =
+      AiConfigProvider(AiSettingsDao(widget.database));
+  late final DictionaryProvider _dictionaryProvider = DictionaryProvider(
+    database: widget.database,
+    termDao: TermDao(widget.database),
+    historyDao: HistoryDao(widget.database),
+    searchService: const SearchService(),
+    aiConfigProvider: _aiConfigProvider,
+  );
 
   @override
   void initState() {
     super.initState();
     _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _settingsProvider.dispose();
+    _aiConfigProvider.dispose();
+    _dictionaryProvider.dispose();
+    super.dispose();
   }
 
   /// 启动流程：打开数据库 -> 导入内置词库 -> 自动同步远程词库 -> 加载主界面。
@@ -93,26 +112,14 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       // 静默降级，不阻断启动。
     }
 
-    // 3. 创建并加载 Provider（主界面数据源）。
-    final settingsProvider = SettingsProvider(SettingsDao(widget.database));
-    final aiConfigProvider = AiConfigProvider(AiSettingsDao(widget.database));
-    final dictionaryProvider = DictionaryProvider(
-      database: widget.database,
-      termDao: TermDao(widget.database),
-      historyDao: HistoryDao(widget.database),
-      searchService: const SearchService(),
-      aiConfigProvider: aiConfigProvider,
-    );
+    // 3. 加载 Provider 数据（主界面数据源）。
     try {
-      await settingsProvider.load();
-      await aiConfigProvider.load();
-      await dictionaryProvider.load();
+      await _settingsProvider.load();
+      await _aiConfigProvider.load();
+      await _dictionaryProvider.load();
     } catch (_) {
       // 保持空状态进入主界面。
     }
-    _settingsProvider = settingsProvider;
-    _aiConfigProvider = aiConfigProvider;
-    _dictionaryProvider = dictionaryProvider;
 
     // 4. 保证加载页至少展示片刻，避免闪烁。
     final remaining = 700 - stopwatch.elapsedMilliseconds;
@@ -124,23 +131,28 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = _settingsProvider;
-    return MaterialApp(
-      title: AppConfig.appTitle,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: settings?.themeMode ?? ThemeMode.system,
-      home: _ready
-          ? MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(value: settings!),
-                ChangeNotifierProvider.value(value: _aiConfigProvider!),
-                ChangeNotifierProvider.value(value: _dictionaryProvider!),
-              ],
-              child: const HomeScreen(),
-            )
-          : SplashScreen(status: _status, detail: _detail),
+    // Provider 包裹整个 MaterialApp：主题切换实时生效，对话框可正常访问状态。
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _settingsProvider),
+        ChangeNotifierProvider.value(value: _aiConfigProvider),
+        ChangeNotifierProvider.value(value: _dictionaryProvider),
+      ],
+      child: ListenableBuilder(
+        listenable: _settingsProvider,
+        builder: (context, _) {
+          return MaterialApp(
+            title: AppConfig.appTitle,
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: _settingsProvider.themeMode,
+            home: _ready
+                ? const HomeScreen()
+                : SplashScreen(status: _status, detail: _detail),
+          );
+        },
+      ),
     );
   }
 }

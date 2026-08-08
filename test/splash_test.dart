@@ -3,6 +3,8 @@ import 'package:ai_dictionary/database/term_dao.dart';
 import 'package:ai_dictionary/main.dart';
 import 'package:ai_dictionary/models/term.dart';
 import 'package:ai_dictionary/services/update_service.dart';
+import 'package:ai_dictionary/screens/home_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -78,5 +80,55 @@ void main() {
 
     expect(find.text('Search AI terms...'), findsOneWidget);
     expect(find.text('Agent'), findsOneWidget);
+  });
+
+  testWidgets('主题切换实时生效，无需重启', (tester) async {
+    final updateService = UpdateService(
+      db,
+      client: MockClient((request) async => http.Response('not found', 404)),
+      baseUrl: 'http://dictionary.test',
+    );
+
+    await tester.pumpWidget(
+      AIDictionaryApp(database: db, updateService: updateService),
+    );
+    await tester.pumpAndSettle();
+
+    Brightness brightness() =>
+        Theme.of(tester.element(find.byType(HomeScreen))).brightness;
+
+    expect(brightness(), Brightness.light);
+
+    await tester.tap(find.byIcon(Icons.dark_mode_rounded));
+    await tester.pumpAndSettle();
+    expect(brightness(), Brightness.dark, reason: '切深色应即时生效');
+
+    await tester.tap(find.byIcon(Icons.light_mode_rounded));
+    await tester.pumpAndSettle();
+    expect(brightness(), Brightness.light, reason: '切回浅色应即时生效');
+  });
+
+  testWidgets('设置对话框内容完整显示（回归：对话框可访问 Provider）', (tester) async {
+    final updateService = UpdateService(
+      db,
+      client: MockClient((request) async => http.Response('not found', 404)),
+      baseUrl: 'http://dictionary.test',
+    );
+
+    await tester.pumpWidget(
+      AIDictionaryApp(database: db, updateService: updateService),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('设置'), findsOneWidget);
+    expect(find.text('外观'), findsOneWidget);
+    expect(find.text('浅色模式'), findsOneWidget);
+    expect(find.text('深色模式'), findsOneWidget);
+    expect(find.text('AI 服务设置'), findsOneWidget);
+    expect(find.text('保存 AI 服务配置'), findsOneWidget);
+    expect(find.text('关闭'), findsOneWidget);
   });
 }
