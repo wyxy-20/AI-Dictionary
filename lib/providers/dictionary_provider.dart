@@ -210,4 +210,13 @@ class DictionaryProvider extends ChangeNotifier {
     ));
     return content;
   }
+
+  /// 读取指定词条的有效 AI 解释缓存；没有则返回 null（不会调用 AI）。
+  Future<String?> getCachedExplanation(Term term) async {
+    final id = term.id;
+    if (id == null) return null;
+    final config = _aiConfigProvider.config;
+    final cache = await aiCacheDao.findValid(id, term.version, config.modelName);
+    return cache?.content;
+  }
 }

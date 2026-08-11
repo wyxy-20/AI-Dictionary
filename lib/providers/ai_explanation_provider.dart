@@ -5,7 +5,7 @@ import '../services/ai/ai_service.dart';
 import 'dictionary_provider.dart';
 
 /// AI 解释面板状态：控制右侧侧边栏的显示/隐藏、加载/成功/错误状态。
-enum AiExplanationStatus { idle, loading, success, error }
+enum AiExplanationStatus { idle, loading, success, error, prompt }
 
 class AiExplanationProvider extends ChangeNotifier {
   AiExplanationProvider(this._dictionaryProvider) {
@@ -72,14 +72,37 @@ class AiExplanationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 面板打开时，把侧边栏同步到当前选中的词条（缓存优先）。
-  void _syncWithSelection() {
+  /// 面板打开时，把侧边栏同步到当前选中的词条：
+  /// 有缓存 -> 直接展示；无缓存 -> 提示用户是否生成（不自动调用 AI）。
+  Future<void> _syncWithSelection() async {
     final selected = _dictionaryProvider.selectedTerm;
     final selectedId = selected?.id;
     if (!_isOpen || selectedId == null) return;
     if (_handledTermId == selectedId) return;
     _handledTermId = selectedId;
-    generate(selected!);
+    _term = selected;
+    _content = null;
+    _error = null;
+    _status = AiExplanationStatus.loading;
+    notifyListeners();
+
+    final cached = await _dictionaryProvider.getCachedExplanation(selected!);
+    // 等待期间面板可能已关闭或又切换了词条
+    if (!_isOpen || _handledTermId != selectedId) return;
+    if (cached != null && cached.isNotEmpty) {
+      _content = cached;
+      _status = AiExplanationStatus.success;
+    } else {
+      _status = AiExplanationStatus.prompt;
+    }
+    notifyListeners();
+  }
+
+  /// 用户选择"暂不生成"：回到空闲提示，但保留当前词条记录，
+  /// 再次切换回来时会重新询问。
+  void skipPrompt() {
+    _status = AiExplanationStatus.idle;
+    notifyListeners();
   }
 
   void _onDictionaryChanged() {

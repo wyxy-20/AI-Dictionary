@@ -150,6 +150,60 @@ class AiExplanationPanel extends StatelessWidget {
           ),
         );
 
+      case AiExplanationStatus.prompt:
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.help_outline_rounded, size: 42, color: scheme.primary),
+                const SizedBox(height: 14),
+                Text(
+                  term == null
+                      ? '该词条还没有 AI 解释记录'
+                      : '「${term.englishName}」还没有 AI 解释记录',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '是否现在生成一份小白友好的解释？',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: provider.skipPrompt,
+                        child: const Text('暂不生成'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: term == null
+                            ? null
+                            : () => provider.generate(term),
+                        icon: const Icon(Icons.auto_awesome_rounded, size: 16),
+                        label: const Text('生成 AI 解释'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+
       case AiExplanationStatus.success:
         final content = provider.content ?? '';
         final sections = parseSections(content);

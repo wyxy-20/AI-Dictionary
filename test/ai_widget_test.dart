@@ -174,7 +174,7 @@ void main() {
     expect(find.byType(AiExplanationPanel), findsNothing);
   });
 
-  testWidgets('侧边栏打开时切换词条会自动跟随更新（缓存优先）', (tester) async {
+  testWidgets('切换词条：有缓存直接展示，无缓存提示是否生成（不自动调用）', (tester) async {
     setDesktopView(tester);
     await TermDao(db).insertAll([makeTerm('RAG', '检索增强生成')]);
 
@@ -196,16 +196,60 @@ void main() {
     expect(service.calls, 1);
     expect(find.textContaining('Agent 的简单解释'), findsOneWidget);
 
-    // 切换到 RAG：侧边栏应自动跟随
+    // 切换到 RAG（无缓存）：只提示，不自动调用 AI
     await tester.tap(find.text('RAG'));
     await tester.pumpAndSettle();
-    expect(service.calls, 2, reason: '切换词条后应为新词条生成');
+    expect(service.calls, 1, reason: '无缓存时不应自动调用 AI');
+    expect(find.text('「RAG」还没有 AI 解释记录'), findsOneWidget);
+    expect(find.text('生成 AI 解释'), findsOneWidget);
+
+    // 用户确认生成
+    await tester.tap(find.text('生成 AI 解释'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 2);
     expect(find.textContaining('RAG 的简单解释'), findsOneWidget);
 
-    // 切回 Agent：命中缓存，不重复调用 API
+    // 切回 Agent：命中缓存，直接展示，不重复调用 API
     await tester.tap(find.text('Agent'));
     await tester.pumpAndSettle();
     expect(service.calls, 2, reason: '切回已解释词条应命中缓存');
     expect(find.textContaining('Agent 的简单解释'), findsOneWidget);
+  });
+
+  testWidgets('选择暂不生成后切走再切回会重新询问', (tester) async {
+    setDesktopView(tester);
+    await TermDao(db).insertAll([makeTerm('RAG', '检索增强生成')]);
+
+    final service = StubExplainService();
+    final aiConfig = AiConfigProvider(
+      AiSettingsDao(db),
+      serviceFactory: (_) => service,
+    );
+    await aiConfig.load();
+
+    await tester.pumpWidget(buildApp(db, aiConfig));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Agent'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('AI 解释'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 1);
+
+    await tester.tap(find.text('RAG'));
+    await tester.pumpAndSettle();
+    expect(find.text('「RAG」还没有 AI 解释记录'), findsOneWidget);
+
+    await tester.tap(find.text('暂不生成'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 1);
+
+    await tester.tap(find.text('Agent'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('RAG'));
+    await tester.pumpAndSettle();
+    expect(find.text('「RAG」还没有 AI 解释记录'), findsOneWidget,
+        reason: '再次切回无缓存词条应重新询问');
+    expect(service.calls, 1);
   });
 }
