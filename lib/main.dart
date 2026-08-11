@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +18,7 @@ import 'providers/dictionary_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
+import 'services/ai/secure_key_store.dart';
 import 'services/search_service.dart';
 import 'services/seed_service.dart';
 import 'services/tray_service.dart';
@@ -83,8 +86,14 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
   // 因此弹窗 / 对话框也能访问（修复"设置打开无内容"）。
   late final SettingsProvider _settingsProvider =
       SettingsProvider(SettingsDao(widget.database));
-  late final AiConfigProvider _aiConfigProvider =
-      AiConfigProvider(AiSettingsDao(widget.database));
+  late final AiConfigProvider _aiConfigProvider = AiConfigProvider(
+    AiSettingsDao(
+      widget.database,
+      keyStore: Platform.isWindows
+          ? WindowsDpapiKeyStore()
+          : const NoopSecureKeyStore(),
+    ),
+  );
   late final DictionaryProvider _dictionaryProvider = DictionaryProvider(
     database: widget.database,
     termDao: TermDao(widget.database),

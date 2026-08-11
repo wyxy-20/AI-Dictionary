@@ -2,7 +2,9 @@
 
 面向 AI 学习者的专业 AI 术语词典 —— Windows 桌面应用。
 
-基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（英文 / 中文 / 分类 / 难度 / 简介 / 详细解释 / 应用场景 / 相关词条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
+基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（启动后自动同步远程词库，当前已收录 **1110+** 条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
+
+本项目基于 [MIT License](LICENSE) 开源。
 
 ## 功能一览
 
@@ -43,7 +45,7 @@ lib/
 │   ├── search_service.dart    # 高级搜索（中英 / 关键词 / 模糊）
 │   ├── data_export_service.dart # 词库 JSON 备份导出
 │   ├── update_service.dart     # 启动自动同步词库（检查版本/下载/增量更新）
-│   └── ai/ai_service.dart     # AI 功能预留接口 + Stub 实现
+│   └── ai/ai_service.dart     # OpenAI 兼容 AI 服务（解释生成 + SQLite 缓存）
 ├── providers/
 │   ├── dictionary_provider.dart # 词库、搜索、视图、收藏、历史状态
 │   └── settings_provider.dart   # 主题 / 语言状态
@@ -162,7 +164,7 @@ tool/generate_icon.py          # 应用图标生成脚本
 ```powershell
 flutter pub get
 flutter test          # 运行全部测试
-cd <build-dir>
+cd ..\ai-dict-build   # 目录联接（junction），可由 tool\build_windows.ps1 自动创建
 flutter run -d windows
 ```
 
@@ -272,9 +274,18 @@ git checkout -- .
 .\tool\restore.ps1     # 从备份列表选择并恢复
 ```
 
-基线快照：`<backup-dir>\`
+基线快照：项目同级目录 `AI词典备份`（例如 `文档\AI词典备份`）
 
 - `source-v1.0.0-20260808.zip` —— 全部源码（85 个文件）
 - `app-v1.0.0-20260808.zip` —— 可运行 Release 程序（含图标、SQLite、资源）
 
 > 提示：备份目录在项目文件夹之外，即使项目目录被误删，也能用 ZIP 完整恢复。
+
+## 隐私与安全
+
+- **数据本地存储**：词条、收藏、历史、设置与 AI 解释缓存全部保存在本机 SQLite（Windows 路径：`%APPDATA%\com.aidictionary\AI Dictionary\ai_dictionary.db`），不会上传到任何服务器。
+- **启动同步**：仅从 `raw.githubusercontent.com/wyxy-20/AI-Terms-Database` 读取 `version.json` / `terms.json`，不发送任何个人数据。
+- **AI 解释**：点击 AI 解释时，会把该词条的公开内容（名称 / 分类 / 描述 / 应用 / 相关词条）发送到你配置的模型服务（如 DeepSeek、OpenAI 或本地 Ollama / LM Studio）。请选择信任的服务商；使用本地模型时数据不会离开本机。
+- **API Key 保护**：AI 服务 API Key 使用 Windows DPAPI 加密后存入本地数据库，仅当前 Windows 用户可解密（v1.8.0 起），旧版本明文会自动迁移。
+- **全局快捷键**：启用全局快捷搜索后，应用会在系统层面监听你设置的热键组合，仅用于触发搜索窗口，不记录其他按键。
+- **无遥测**：应用不包含任何统计、崩溃上报或广告 SDK。

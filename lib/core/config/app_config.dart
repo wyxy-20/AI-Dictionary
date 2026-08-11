@@ -5,7 +5,7 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.7.0';
+  static const String version = '1.8.0';
 
   static const String databaseFileName = 'ai_dictionary.db';
   static const int databaseVersion = 4;

@@ -41,7 +41,15 @@ public class QuickSearchSmoke2 {
 }
 "@
 
-$exe = '<build-dir>\build\windows\x64\runner\Release\ai_dictionary.exe'
+# Locate the Release exe: project-local build dir first, then the ASCII junction.
+$candidates = @(
+  (Join-Path $PSScriptRoot '..\build\windows\x64\runner\Release\ai_dictionary.exe'),
+  (Join-Path $PSScriptRoot '..\..\ai-dict-build\build\windows\x64\runner\Release\ai_dictionary.exe')
+)
+$exe = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if (-not $exe) {
+  throw 'ai_dictionary.exe not found. Run tool\build_windows.ps1 first.'
+}
 
 function Get-AppWindows([int]$appPid) {
   $script:acc = @()
