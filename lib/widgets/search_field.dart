@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/l10n/app_strings.dart';
 import '../providers/dictionary_provider.dart';
 
 /// 顶部实时搜索框。
@@ -32,6 +33,7 @@ class _SearchFieldState extends State<SearchField> {
   Widget build(BuildContext context) {
     final provider = context.watch<DictionaryProvider>();
     final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
@@ -44,7 +46,7 @@ class _SearchFieldState extends State<SearchField> {
         prefixIcon: Icon(Icons.search_rounded, size: 20, color: scheme.outline),
         suffixIcon: provider.query.isNotEmpty
             ? IconButton(
-                tooltip: '清空',
+                tooltip: s.clearSearch,
                 icon: const Icon(Icons.close_rounded, size: 18),
                 onPressed: _clear,
               )

@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../core/config/app_config.dart';
+import '../core/l10n/app_strings.dart';
 
 /// 启动加载页：展示自动同步词库的状态。
 class SplashScreen extends StatelessWidget {
   const SplashScreen({
     super.key,
-    this.status = '正在初始化本地词库...',
-    this.detail = '',
+    this.statusKey = 'init',
+    this.detailKey = '',
   });
 
-  final String status;
-  final String detail;
+  /// 'init' | 'sync'
+  final String statusKey;
+
+  /// '' | 'checking' | 'downloading' | 'updating' | 'done'
+  final String detailKey;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
     return Scaffold(
       body: Center(
         child: Column(
@@ -37,7 +42,7 @@ class SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              AppConfig.appNameZh,
+              s.appNameZh,
               style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 30),
@@ -48,22 +53,34 @@ class SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              status,
+              _statusText(s),
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
             Text(
-              detail,
+              _detailText(s),
               style: TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 40),
             Text(
-              'v${AppConfig.version} · 词库 v${AppConfig.seedDictionaryVersion}',
+              s.versionLine(AppConfig.version, AppConfig.seedDictionaryVersion),
               style: TextStyle(fontSize: 11, color: scheme.outline),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _statusText(AppStrings s) => statusKey == 'sync' ? s.syncing : s.initLocal;
+
+  String _detailText(AppStrings s) {
+    return switch (detailKey) {
+      'checking' => s.checkingUpdates,
+      'downloading' => s.downloadingTerms,
+      'updating' => s.updatingDatabase,
+      'done' => s.syncDone,
+      _ => '',
+    };
   }
 }

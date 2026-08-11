@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
 import '../core/constants/app_constants.dart';
+import '../core/l10n/app_strings.dart';
 import '../models/ai_config.dart';
 import '../providers/ai_config_provider.dart';
 import '../providers/dictionary_provider.dart';
@@ -51,7 +52,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final modelName = _modelCtrl.text.trim();
     if (baseUrl.isEmpty || modelName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请填写 AI 服务地址与模型名称')),
+        SnackBar(content: Text(AppStrings.of(context).fillRequired)),
       );
       return;
     }
@@ -59,7 +60,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       await provider.save(AiConfig(baseUrl: baseUrl, apiKey: apiKey, modelName: modelName));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('AI 服务配置已保存')),
+          SnackBar(content: Text(AppStrings.of(context).configSaved)),
         );
       }
     });
@@ -71,7 +72,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final modelName = _modelCtrl.text.trim();
     if (baseUrl.isEmpty || modelName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先填写 AI 服务地址与模型名称')),
+        SnackBar(content: Text(AppStrings.of(context).fillRequired)),
       );
       return;
     }
@@ -85,12 +86,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('连接成功'),
-          content: Text('AI 服务连接正常。\n\n模型回复：$reply'),
+          title: Text(AppStrings.of(context).connectionSuccess),
+          content: Text(AppStrings.of(context).connectionOkBody(reply)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('知道了'),
+              child: Text(AppStrings.of(context).close),
             ),
           ],
         ),
@@ -115,12 +116,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('连接失败'),
+        title: Text(AppStrings.of(context).connectionFailed),
         content: SelectableText(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('知道了'),
+            child: Text(AppStrings.of(context).close),
           ),
         ],
       ),
@@ -136,6 +137,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
   }
 
+  String _themeLabel(AppStrings s, String theme) {
+    return switch (theme) {
+      'system' => s.themeSystem,
+      'light' => s.themeLight,
+      'dark' => s.themeDark,
+      _ => theme,
+    };
+  }
+
   Future<void> _exportData() async {
     final provider = context.read<DictionaryProvider>();
     await _run(() async {
@@ -143,9 +153,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('已导出到：$path'),
+          content: Text('${AppStrings.of(context).exportedTo}$path'),
           action: SnackBarAction(
-            label: '打开位置',
+            label: AppStrings.of(context).openLocation,
             onPressed: () => DataExportService(provider.database).revealInExplorer(path),
           ),
         ),
@@ -157,16 +167,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('清空浏览历史'),
-        content: const Text('确定要清空所有浏览历史记录吗？此操作不可撤销。'),
+        title: Text(AppStrings.of(ctx).clearHistoryTitle),
+        content: Text(AppStrings.of(ctx).clearHistoryConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('取消'),
+            child: Text(AppStrings.of(ctx).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('清空'),
+            child: Text(AppStrings.of(ctx).clear),
           ),
         ],
       ),
@@ -183,19 +193,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('重置为初始数据'),
-        content: const Text('将删除本地词库与历史记录，并从内置 JSON 词库重新导入。确定继续吗？'),
+        title: Text(AppStrings.of(ctx).resetTitle),
+        content: Text(AppStrings.of(ctx).resetConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('取消'),
+            child: Text(AppStrings.of(ctx).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
-            child: const Text('重置'),
+            child: Text(AppStrings.of(ctx).reset),
           ),
         ],
       ),
@@ -207,7 +217,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       await provider.refreshAll();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已重置为初始词库')),
+          SnackBar(content: Text(AppStrings.of(context).resetDone)),
         );
       }
     });
@@ -218,9 +228,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final settings = context.watch<SettingsProvider>();
     final provider = context.watch<DictionaryProvider>();
     final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
 
     return AlertDialog(
-      title: const Text('设置'),
+      title: Text(s.settings),
       contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
       content: SizedBox(
         width: 520,
@@ -231,7 +242,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _SectionTitle(icon: Icons.palette_outlined, title: '外观'),
+                  _SectionTitle(icon: Icons.palette_outlined, title: s.appearance),
                   _GroupCard(
                     child: Column(
                       children: [
@@ -255,7 +266,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                         color: scheme.onSurfaceVariant,
                                       ),
                                       const SizedBox(width: 8),
-                                      Text(AppConstants.themeLabels[theme]!),
+                                      Text(_themeLabel(s, theme)),
                                     ],
                                   ),
                                   value: theme,
@@ -264,6 +275,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                         ),
                         const Divider(),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              s.languageLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
                         RadioGroup<String>(
                           groupValue: settings.settings.language,
                           onChanged: (v) {
@@ -286,7 +310,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  _SectionTitle(icon: Icons.storage_rounded, title: '数据管理'),
+                  _SectionTitle(icon: Icons.storage_rounded, title: s.dataManagement),
                   _GroupCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -294,7 +318,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
-                            '词条 ${provider.totalCount} · 收藏 ${provider.favoriteCount}',
+                            s.statsLine(provider.totalCount, provider.favoriteCount),
                             style: TextStyle(
                               fontSize: 12.5,
                               color: scheme.onSurfaceVariant,
@@ -303,20 +327,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                         _ActionRow(
                           icon: Icons.upload_file_rounded,
-                          label: '导出词库备份',
-                          caption: '将全部词条导出为 JSON 文件',
+                          label: s.exportBackup,
+                          caption: s.exportCaption,
                           onTap: _busy ? null : _exportData,
                         ),
                         _ActionRow(
                           icon: Icons.history_rounded,
-                          label: '清空浏览历史',
-                          caption: '删除所有历史记录',
+                          label: s.clearHistory,
+                          caption: s.clearHistoryCaption,
                           onTap: _busy ? null : _clearHistory,
                         ),
                         _ActionRow(
                           icon: Icons.restart_alt_rounded,
-                          label: '重置为初始数据',
-                          caption: '重新导入内置 JSON 词库',
+                          label: s.resetData,
+                          caption: s.resetCaption,
                           onTap: _busy ? null : _resetData,
                         ),
                       ],
@@ -325,24 +349,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   const SizedBox(height: 18),
                   _SectionTitle(
                     icon: Icons.settings_input_component_rounded,
-                    title: 'AI 服务设置',
+                    title: s.aiServiceSettings,
                   ),
                   _GroupCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 6),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
-                            '支持 OpenAI / DeepSeek / Qwen / 本地模型等 OpenAI 兼容接口',
-                            style: TextStyle(fontSize: 11.5),
+                            s.aiServiceHint,
+                            style: const TextStyle(fontSize: 11.5),
                           ),
                         ),
                         TextField(
                           controller: _baseUrlCtrl,
                           enabled: !_busy,
-                          decoration: const InputDecoration(
-                            labelText: 'AI 服务地址（Base URL）',
+                          decoration: InputDecoration(
+                            labelText: s.baseUrlLabel,
                             hintText: '如 https://api.deepseek.com 或 https://api.openai.com/v1',
                             isDense: true,
                           ),
@@ -353,7 +377,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           enabled: !_busy,
                           obscureText: _obscureKey,
                           decoration: InputDecoration(
-                            labelText: 'API Key',
+                            labelText: s.apiKeyLabel,
                             hintText: 'sk-...',
                             isDense: true,
                             suffixIcon: IconButton(
@@ -373,8 +397,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         TextField(
                           controller: _modelCtrl,
                           enabled: !_busy,
-                          decoration: const InputDecoration(
-                            labelText: '模型名称（Model）',
+                          decoration: InputDecoration(
+                            labelText: s.modelLabel,
                             hintText: 'deepseek-chat / gpt-4o-mini / qwen-plus',
                             isDense: true,
                           ),
@@ -386,7 +410,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               child: OutlinedButton.icon(
                                 onPressed: _busy ? null : _testAiConnection,
                                 icon: const Icon(Icons.wifi_tethering_rounded, size: 16),
-                                label: const Text('测试连接'),
+                                label: Text(s.testConnection),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -394,7 +418,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               child: FilledButton.icon(
                                 onPressed: _busy ? null : _saveAiConfig,
                                 icon: const Icon(Icons.save_rounded, size: 16),
-                                label: const Text('保存配置'),
+                                label: Text(s.saveConfig),
                               ),
                             ),
                           ],
@@ -403,41 +427,41 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  _SectionTitle(icon: Icons.auto_awesome_rounded, title: 'AI 功能（即将推出）'),
+                  _SectionTitle(icon: Icons.auto_awesome_rounded, title: s.aiFeatures),
                   _GroupCard(
                     child: Column(
-                      children: const [
+                      children: [
                         _FutureFeatureRow(
                           icon: Icons.auto_awesome_rounded,
-                          title: 'AI 解释',
-                          caption: '已上线 · 点击词条详情中的 AI 解释按钮体验',
+                          title: s.aiExplain,
+                          caption: s.aiExplainReleased,
                           released: true,
                         ),
                         _FutureFeatureRow(
                           icon: Icons.compare_arrows_rounded,
-                          title: '术语对比',
-                          caption: '对比两个术语（如 RAG vs Fine-tuning）',
+                          title: s.compareTerms,
+                          caption: s.compareTermsCaption,
                         ),
                         _FutureFeatureRow(
                           icon: Icons.forum_outlined,
-                          title: 'AI 问答',
-                          caption: '就 AI 概念自由提问',
+                          title: s.aiQa,
+                          caption: s.aiQaCaption,
                         ),
                         _FutureFeatureRow(
                           icon: Icons.route_rounded,
-                          title: '学习路径',
-                          caption: '输入目标，自动生成学习路线',
+                          title: s.learningPath,
+                          caption: s.learningPathCaption,
                         ),
                         _FutureFeatureRow(
                           icon: Icons.link_rounded,
-                          title: '知识库连接',
-                          caption: '对接 Obsidian / Markdown / 个人 AI 大脑',
+                          title: s.knowledgeBase,
+                          caption: s.knowledgeBaseCaption,
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 18),
-                  _SectionTitle(icon: Icons.info_outline_rounded, title: '关于软件'),
+                  _SectionTitle(icon: Icons.info_outline_rounded, title: s.about),
                   _GroupCard(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -445,7 +469,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${AppConfig.appName}（${AppConfig.appNameZh}）',
+                            '${AppConfig.appName}（${s.appNameZh}）',
                             style: const TextStyle(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w700,
@@ -453,8 +477,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '版本 ${AppConfig.version}\n'
-                            '面向 AI 学习者的专业术语词典，数据本地存储，支持离线查询。',
+                            '${s.versionLine(AppConfig.version, AppConfig.seedDictionaryVersion)}\n'
+                            '${s.aboutDescription}',
                             style: TextStyle(
                               fontSize: 12.5,
                               height: 1.6,
@@ -482,7 +506,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(s.close),
         ),
       ],
     );

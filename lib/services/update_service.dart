@@ -11,6 +11,9 @@ import '../models/dictionary_version.dart';
 import '../models/term.dart';
 import '../utils/version_utils.dart';
 
+/// 同步过程中的阶段（用于启动页本地化状态展示）。
+enum SyncStage { checking, downloading, updating, done }
+
 /// 一次同步的结果。
 class SyncResult {
   const SyncResult._(
@@ -72,7 +75,7 @@ class UpdateService {
   /// 注入的自定义 HTTP 客户端（测试用）；为空时内部自动创建。
   final http.Client? client;
   final String _baseUrl;
-  final void Function(String message)? onProgress;
+  final void Function(SyncStage stage)? onProgress;
 
   /// 执行一次同步。
   ///
@@ -92,7 +95,7 @@ class UpdateService {
         return SyncResult.skipped(local.version);
       }
 
-      onProgress?.call('检查更新...');
+      onProgress?.call(SyncStage.checking);
       final remote = await _fetchVersion(httpClient);
       await versionDao.updateLastCheckTime(now);
 
@@ -101,10 +104,10 @@ class UpdateService {
         return SyncResult.upToDate(local.version);
       }
 
-      onProgress?.call('正在下载新词条...');
+      onProgress?.call(SyncStage.downloading);
       final terms = await _fetchTerms(httpClient);
 
-      onProgress?.call('正在更新数据库...');
+      onProgress?.call(SyncStage.updating);
       final incremental = await _applyIncremental(terms);
       final added = incremental.$1;
       final updated = incremental.$2;
@@ -115,7 +118,7 @@ class UpdateService {
         termsCount: terms.length,
         lastCheckTime: now,
       ));
-      onProgress?.call('完成。');
+      onProgress?.call(SyncStage.done);
       return SyncResult.updated(remote.version, added, updated: updated);
     } on Exception {
       // 网络异常 / 远程不可达 / 数据解析失败：静默降级到本地词库。

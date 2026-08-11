@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/l10n/app_strings.dart';
 import '../providers/dictionary_provider.dart';
 
 /// 左侧栏：视图切换（全部 / 收藏 / 最近浏览）+ A-Z 字母导航。
@@ -16,16 +17,17 @@ class LeftNavPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final provider = context.watch<DictionaryProvider>();
+    final s = AppStrings.of(context);
 
     return ColoredBox(
       color: scheme.surfaceContainerLowest,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 12),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              '浏览',
+              s.browse,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -36,14 +38,14 @@ class LeftNavPanel extends StatelessWidget {
           ),
           _NavButton(
             icon: Icons.grid_view_rounded,
-            label: '全部词条',
+            label: s.allTerms,
             selected: provider.view == ViewFilter.all && provider.letter == null,
             onTap: () => provider.setView(ViewFilter.all),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
             child: Text(
-              '字母导航',
+              s.letterNav,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -73,7 +75,7 @@ class LeftNavPanel extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
             child: Text(
-              '视图',
+              s.viewSection,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -84,7 +86,7 @@ class LeftNavPanel extends StatelessWidget {
           ),
           _NavButton(
             icon: Icons.star_rounded,
-            label: '我的收藏',
+            label: s.favorites,
             trailing: Text(
               '${provider.favoriteCount}',
               style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
@@ -94,15 +96,15 @@ class LeftNavPanel extends StatelessWidget {
           ),
           _NavButton(
             icon: Icons.history_rounded,
-            label: '最近浏览',
+            label: s.recent,
             selected: provider.view == ViewFilter.recent,
             onTap: () => provider.setView(ViewFilter.recent),
           ),
-          const Spacer(),
+          const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
             child: Text(
-              '共 ${provider.totalCount} 个词条',
+              s.totalTerms(provider.totalCount),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 11, color: scheme.outline),
             ),
@@ -188,7 +190,7 @@ class _LetterButton extends StatelessWidget {
     final foreground = selected ? scheme.onPrimary : scheme.onSurfaceVariant;
 
     return Tooltip(
-      message: '查看字母 $letter 开头的词条',
+      message: AppStrings.of(context).letterTooltip(letter),
       waitDuration: const Duration(milliseconds: 600),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),

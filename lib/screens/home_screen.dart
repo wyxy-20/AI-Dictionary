@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
+import '../core/l10n/app_strings.dart';
 import '../providers/ai_explanation_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/ai_explanation_panel.dart';
@@ -56,6 +57,7 @@ class _TopBar extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
     final aiPanel = context.watch<AiExplanationProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = AppStrings.of(context);
 
     return Container(
       height: 62,
@@ -89,7 +91,7 @@ class _TopBar extends StatelessWidget {
                 style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
               ),
               Text(
-                AppConfig.appNameZh,
+                s.appNameZh,
                 style: TextStyle(fontSize: 10.5, color: scheme.onSurfaceVariant),
               ),
             ],
@@ -98,7 +100,7 @@ class _TopBar extends StatelessWidget {
           const Expanded(child: SearchField()),
           const SizedBox(width: 8),
           IconButton(
-            tooltip: aiPanel.isOpen ? '隐藏 AI 解释面板' : '显示 AI 解释面板',
+            tooltip: aiPanel.isOpen ? s.hideAiPanel : s.showAiPanel,
             onPressed: aiPanel.toggle,
             icon: Icon(
               aiPanel.isOpen
@@ -109,7 +111,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: isDark ? '切换到浅色模式' : '切换到深色模式',
+            tooltip: isDark ? s.switchLight : s.switchDark,
             onPressed: () => settings.setTheme(isDark ? 'light' : 'dark'),
             icon: Icon(
               isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
@@ -117,7 +119,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: '设置',
+            tooltip: s.settings,
             onPressed: () => showDialog<void>(
               context: context,
               builder: (_) => const SettingsDialog(),

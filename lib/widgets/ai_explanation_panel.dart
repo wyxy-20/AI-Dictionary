@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../core/l10n/app_strings.dart';
 import '../models/term.dart';
 import '../providers/ai_explanation_provider.dart';
 
@@ -40,6 +41,7 @@ class AiExplanationPanel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final provider = context.watch<AiExplanationProvider>();
     final term = provider.term;
+    final s = AppStrings.of(context);
 
     return ColoredBox(
       color: scheme.surfaceContainerLowest,
@@ -52,9 +54,9 @@ class AiExplanationPanel extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome_rounded, size: 18, color: scheme.primary),
                 const SizedBox(width: 8),
-                const Text(
-                  'AI 解释',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                Text(
+                  s.aiExplainTitle,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -69,7 +71,7 @@ class AiExplanationPanel extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: '关闭 AI 解释面板',
+                  tooltip: s.closeAiPanel,
                   onPressed: provider.close,
                   icon: const Icon(Icons.close_rounded, size: 18),
                 ),
@@ -89,6 +91,7 @@ class AiExplanationPanel extends StatelessWidget {
     Term? term,
   ) {
     final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
 
     switch (provider.status) {
       case AiExplanationStatus.loading:
@@ -104,9 +107,9 @@ class AiExplanationPanel extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 3),
                 ),
                 const SizedBox(height: 18),
-                const Text(
-                  '正在生成AI解释...',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                Text(
+                  s.generating,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
                 ),
                 if (term != null) ...[
                   const SizedBox(height: 6),
@@ -143,7 +146,7 @@ class AiExplanationPanel extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: () => provider.generate(term, force: true),
                     icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('重新生成'),
+                    label: Text(s.regenerate),
                   ),
               ],
             ),
@@ -161,8 +164,8 @@ class AiExplanationPanel extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   term == null
-                      ? '该词条还没有 AI 解释记录'
-                      : '「${term.englishName}」还没有 AI 解释记录',
+                      ? s.noAiRecordGeneric
+                      : s.noAiRecord(term.englishName),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -171,7 +174,7 @@ class AiExplanationPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '是否现在生成一份小白友好的解释？',
+                  s.askGenerate,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
@@ -184,7 +187,7 @@ class AiExplanationPanel extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: provider.skipPrompt,
-                        child: const Text('暂不生成'),
+                        child: Text(s.skipForNow),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -194,7 +197,7 @@ class AiExplanationPanel extends StatelessWidget {
                             ? null
                             : () => provider.generate(term),
                         icon: const Icon(Icons.auto_awesome_rounded, size: 16),
-                        label: const Text('生成 AI 解释'),
+                        label: Text(s.generateNow),
                       ),
                     ),
                   ],
@@ -242,7 +245,7 @@ class AiExplanationPanel extends StatelessWidget {
                           ? null
                           : () => provider.generate(term, force: true),
                       icon: const Icon(Icons.refresh_rounded, size: 15),
-                      label: const Text('重新生成'),
+                      label: Text(s.regenerate),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -252,11 +255,11 @@ class AiExplanationPanel extends StatelessWidget {
                         await Clipboard.setData(ClipboardData(text: content));
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('解释内容已复制到剪贴板')),
+                          SnackBar(content: Text(s.copied)),
                         );
                       },
                       icon: const Icon(Icons.copy_rounded, size: 15),
-                      label: const Text('复制'),
+                      label: Text(s.copy),
                     ),
                   ),
                 ],
@@ -275,7 +278,7 @@ class AiExplanationPanel extends StatelessWidget {
                 Icon(Icons.auto_awesome_outlined, size: 40, color: scheme.outline),
                 const SizedBox(height: 14),
                 Text(
-                  '点击词条详情中的「AI 解释」生成小白友好的解释',
+                  s.idleHint,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
                 ),

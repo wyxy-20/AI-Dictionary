@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/l10n/app_strings.dart';
 import '../providers/ai_explanation_provider.dart';
 import '../providers/dictionary_provider.dart';
 import 'difficulty_stars.dart';
@@ -14,12 +15,13 @@ class TermDetailPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<DictionaryProvider>();
     final term = provider.selectedTerm;
+    final s = AppStrings.of(context);
 
     if (term == null) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.menu_book_outlined,
-        title: '选择一个词条查看详情',
-        subtitle: '点击左侧或中间列表中的词条，即可查看完整解释',
+        title: s.selectTermHint,
+        subtitle: s.selectTermSub,
       );
     }
 
@@ -58,7 +60,7 @@ class TermDetailPanel extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: term.favorite ? '取消收藏' : '收藏',
+                tooltip: term.favorite ? s.removeFavorite : s.addFavorite,
                 onPressed: () => provider.toggleFavorite(term),
                 icon: Icon(
                   term.favorite ? Icons.star_rounded : Icons.star_border_rounded,
@@ -67,7 +69,7 @@ class TermDetailPanel extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'AI 解释',
+                tooltip: s.aiExplain,
                 onPressed: () =>
                     context.read<AiExplanationProvider>().generate(term),
                 icon: Icon(Icons.auto_awesome_rounded, color: scheme.primary),
@@ -95,7 +97,7 @@ class TermDetailPanel extends StatelessWidget {
               const SizedBox(height: 18),
               _DetailSection(
                 icon: Icons.bolt_rounded,
-                title: '一句话解释',
+                title: s.oneLineSummary,
                 child: Text(
                   term.shortDescription,
                   style: const TextStyle(fontSize: 14.5, height: 1.55),
@@ -104,7 +106,7 @@ class TermDetailPanel extends StatelessWidget {
               const SizedBox(height: 14),
               _DetailSection(
                 icon: Icons.article_outlined,
-                title: '详细解释',
+                title: s.detailExplanation,
                 child: Text(
                   term.detailDescription,
                   style: const TextStyle(fontSize: 14, height: 1.7),
@@ -114,7 +116,7 @@ class TermDetailPanel extends StatelessWidget {
                 const SizedBox(height: 14),
                 _DetailSection(
                   icon: Icons.apps_rounded,
-                  title: '应用场景',
+                  title: s.applications,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -153,7 +155,7 @@ class TermDetailPanel extends StatelessWidget {
                 const SizedBox(height: 14),
                 _DetailSection(
                   icon: Icons.link_rounded,
-                  title: '相关词条',
+                  title: s.relatedTerms,
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -172,7 +174,7 @@ class TermDetailPanel extends StatelessWidget {
                 onPressed: () =>
                     context.read<AiExplanationProvider>().generate(term),
                 icon: const Icon(Icons.auto_awesome_rounded, size: 17),
-                label: const Text('AI 解释'),
+                label: Text(s.aiExplain),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),

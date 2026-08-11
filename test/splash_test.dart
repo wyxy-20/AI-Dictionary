@@ -132,4 +132,47 @@ void main() {
     expect(find.text('测试连接'), findsOneWidget);
     expect(find.text('关闭'), findsOneWidget);
   });
+
+  testWidgets('语言切到 English 后界面即时变为英文，无需重启', (tester) async {
+    final updateService = UpdateService(
+      db,
+      client: MockClient((request) async => http.Response('not found', 404)),
+      baseUrl: 'http://dictionary.test',
+    );
+
+    await tester.pumpWidget(
+      AIDictionaryApp(database: db, updateService: updateService),
+    );
+    await tester.pumpAndSettle();
+
+    // 默认中文
+    expect(find.text('全部词条'), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.settings_rounded));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    // 设置对话框立即变为英文
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('AI Service Settings'), findsOneWidget);
+
+    // 关闭后主界面立即变为英文
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.text('All Terms'), findsWidgets);
+    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Recent'), findsOneWidget);
+    expect(find.text('全部词条'), findsNothing);
+
+    // 切回中文，界面立即恢复
+    await tester.tap(find.byIcon(Icons.settings_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('简体中文'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+    expect(find.text('全部词条'), findsWidgets);
+  });
 }

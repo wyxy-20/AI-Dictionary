@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/l10n/app_strings.dart';
 import '../models/term.dart';
 import '../providers/dictionary_provider.dart';
 import 'empty_state.dart';
@@ -15,6 +16,7 @@ class TermListPanel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final provider = context.watch<DictionaryProvider>();
     final terms = provider.visibleTerms;
+    final s = AppStrings.of(context);
     final filtered =
         provider.query.isNotEmpty || provider.letter != null || provider.view != ViewFilter.all;
 
@@ -27,7 +29,7 @@ class TermListPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  provider.filterLabel,
+                  _filterLabel(provider, s),
                   style: const TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
@@ -42,10 +44,10 @@ class TermListPanel extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                   icon: const Icon(Icons.filter_alt_off_rounded, size: 15),
-                  label: const Text('清除筛选', style: TextStyle(fontSize: 12)),
+                  label: Text(s.clearFilters, style: const TextStyle(fontSize: 12)),
                 ),
               Text(
-                '${terms.length} 条',
+                s.countItems(terms.length),
                 style: TextStyle(fontSize: 11.5, color: scheme.outline),
               ),
             ],
@@ -56,10 +58,10 @@ class TermListPanel extends StatelessWidget {
           child: !provider.loaded
               ? const Center(child: CircularProgressIndicator())
               : terms.isEmpty
-                  ? const EmptyState(
+                  ? EmptyState(
                       icon: Icons.search_off_rounded,
-                      title: '未找到相关词条',
-                      subtitle: '换个关键词试试，支持中英文与模糊搜索',
+                      title: s.emptyTitle,
+                      subtitle: s.emptySubtitle,
                     )
                   : provider.grouped
                       ? _GroupedList(terms: terms)
@@ -70,6 +72,15 @@ class TermListPanel extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _filterLabel(DictionaryProvider provider, AppStrings s) {
+    if (provider.query.trim().isNotEmpty) return s.filterSearchResults;
+    return switch (provider.view) {
+      ViewFilter.all => provider.letter == null ? s.allTerms : s.filterLetter(provider.letter!),
+      ViewFilter.favorites => s.favorites,
+      ViewFilter.recent => s.recent,
+    };
   }
 }
 

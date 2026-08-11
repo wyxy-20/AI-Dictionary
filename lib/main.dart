@@ -57,8 +57,8 @@ class AIDictionaryApp extends StatefulWidget {
 
 class _AIDictionaryAppState extends State<AIDictionaryApp> {
   bool _ready = false;
-  String _status = '正在初始化本地词库...';
-  String _detail = '';
+  String _statusKey = 'init';
+  String _detailKey = '';
 
   // Provider 在 State 创建时即存在，始终处于 MaterialApp 之上，
   // 因此弹窗 / 对话框也能访问（修复"设置打开无内容"）。
@@ -105,13 +105,15 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
 
     // 2. 自动检查并同步远程词库（网络异常静默降级）。
     try {
-      setState(() => _status = '正在同步最新 AI 知识库...');
+      setState(() => _statusKey = 'sync');
       final updateService = widget.updateService ??
-          UpdateService(widget.database, onProgress: (message) {
-            if (mounted) setState(() => _detail = message);
+          UpdateService(widget.database, onProgress: (stage) {
+            if (mounted) {
+              setState(() => _detailKey = stage.name);
+            }
           });
       await updateService.syncIfNeeded();
-      if (mounted) setState(() => _detail = '完成。');
+      if (mounted) setState(() => _detailKey = SyncStage.done.name);
     } catch (_) {
       // 静默降级，不阻断启动。
     }
@@ -154,7 +156,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
             themeMode: _settingsProvider.themeMode,
             home: _ready
                 ? const HomeScreen()
-                : SplashScreen(status: _status, detail: _detail),
+                : SplashScreen(statusKey: _statusKey, detailKey: _detailKey),
           );
         },
       ),
