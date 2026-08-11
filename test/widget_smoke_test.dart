@@ -5,6 +5,7 @@ import 'package:ai_dictionary/database/settings_dao.dart';
 import 'package:ai_dictionary/database/term_dao.dart';
 import 'package:ai_dictionary/models/term.dart';
 import 'package:ai_dictionary/providers/ai_config_provider.dart';
+import 'package:ai_dictionary/providers/ai_explanation_provider.dart';
 import 'package:ai_dictionary/providers/dictionary_provider.dart';
 import 'package:ai_dictionary/providers/settings_provider.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
@@ -44,6 +45,9 @@ Widget buildApp(AppDatabase db) {
           termDao: TermDao(db),
           historyDao: HistoryDao(db),
         )..load(),
+      ),
+      ChangeNotifierProvider(
+        create: (ctx) => AiExplanationProvider(ctx.read<DictionaryProvider>()),
       ),
     ],
     child: const MaterialApp(home: HomeScreen()),

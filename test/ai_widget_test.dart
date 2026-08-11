@@ -5,10 +5,12 @@ import 'package:ai_dictionary/database/settings_dao.dart';
 import 'package:ai_dictionary/database/term_dao.dart';
 import 'package:ai_dictionary/models/term.dart';
 import 'package:ai_dictionary/providers/ai_config_provider.dart';
+import 'package:ai_dictionary/providers/ai_explanation_provider.dart';
 import 'package:ai_dictionary/providers/dictionary_provider.dart';
 import 'package:ai_dictionary/providers/settings_provider.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
 import 'package:ai_dictionary/services/ai/ai_service.dart';
+import 'package:ai_dictionary/widgets/ai_explanation_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -65,9 +67,18 @@ Widget buildApp(AppDatabase db, AiConfigProvider aiConfig) {
           aiConfigProvider: aiConfig,
         )..load(),
       ),
+      ChangeNotifierProvider(
+        create: (ctx) => AiExplanationProvider(ctx.read<DictionaryProvider>()),
+      ),
     ],
     child: const MaterialApp(home: HomeScreen()),
   );
+}
+
+void setDesktopView(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
 }
 
 void main() {
@@ -86,7 +97,8 @@ void main() {
     await db.close();
   });
 
-  testWidgets('点击 AI 解释：加载 -> 生成 -> 分模块弹窗 + 复制按钮', (tester) async {
+  testWidgets('点击 AI 解释：右侧边栏加载 -> 分模块内容 + 复制/重新生成', (tester) async {
+    setDesktopView(tester);
     final service = StubExplainService();
     final aiConfig = AiConfigProvider(
       AiSettingsDao(db),
@@ -103,22 +115,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.calls, 1);
-    expect(find.text('AI解释 · Agent'), findsOneWidget);
+    expect(find.byType(AiExplanationPanel), findsOneWidget);
     expect(find.text('一句话理解'), findsOneWidget);
     expect(find.text('详细解释'), findsWidgets);
     expect(find.text('复制'), findsOneWidget);
-    expect(find.text('关闭'), findsOneWidget);
+    expect(find.text('重新生成'), findsOneWidget);
 
-    // 再次点击（重新打开词条后）应命中缓存，不重复调用
-    await tester.tap(find.text('关闭'));
+    // 关闭面板后再次点击：命中缓存，不重复调用 API
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AiExplanationPanel),
+        matching: find.byTooltip('关闭 AI 解释面板'),
+      ),
+    );
     await tester.pumpAndSettle();
+    expect(find.byType(AiExplanationPanel), findsNothing);
     await tester.tap(find.byTooltip('AI 解释'));
     await tester.pumpAndSettle();
     expect(service.calls, 1);
-    expect(find.text('AI解释 · Agent'), findsOneWidget);
+    expect(find.byType(AiExplanationPanel), findsOneWidget);
   });
 
-  testWidgets('未配置 API Key 时显示配置提示，不崩溃', (tester) async {
+  testWidgets('未配置 API Key 时侧边栏显示配置提示，不崩溃', (tester) async {
+    setDesktopView(tester);
     final aiConfig = AiConfigProvider(AiSettingsDao(db));
     await aiConfig.load();
 
@@ -131,5 +150,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('请先配置AI服务。'), findsOneWidget);
+    expect(find.text('重新生成'), findsOneWidget);
+    expect(find.byType(AiExplanationPanel), findsOneWidget);
+  });
+
+  testWidgets('顶部按钮可显示 / 隐藏 AI 解释面板', (tester) async {
+    setDesktopView(tester);
+    final aiConfig = AiConfigProvider(AiSettingsDao(db));
+    await aiConfig.load();
+
+    await tester.pumpWidget(buildApp(db, aiConfig));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AiExplanationPanel), findsNothing);
+
+    await tester.tap(find.byTooltip('显示 AI 解释面板'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AiExplanationPanel), findsOneWidget);
+    expect(find.textContaining('AI 解释'), findsWidgets);
+
+    await tester.tap(find.byTooltip('隐藏 AI 解释面板'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AiExplanationPanel), findsNothing);
   });
 }

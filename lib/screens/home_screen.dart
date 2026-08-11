@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
+import '../providers/ai_explanation_provider.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/ai_explanation_panel.dart';
 import '../widgets/left_nav_panel.dart';
 import '../widgets/search_field.dart';
 import '../widgets/term_detail_panel.dart';
@@ -15,6 +17,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final aiPanel = context.watch<AiExplanationProvider>();
     return Scaffold(
       body: Column(
         children: [
@@ -25,9 +28,16 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(width: 184, child: LeftNavPanel()),
                 const VerticalDivider(),
-                const SizedBox(width: 380, child: TermListPanel()),
+                SizedBox(
+                  width: aiPanel.isOpen ? 300 : 380,
+                  child: const TermListPanel(),
+                ),
                 const VerticalDivider(),
                 const Expanded(child: TermDetailPanel()),
+                if (aiPanel.isOpen) ...[
+                  const VerticalDivider(),
+                  const SizedBox(width: 340, child: AiExplanationPanel()),
+                ],
               ],
             ),
           ),
@@ -44,6 +54,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final settings = context.watch<SettingsProvider>();
+    final aiPanel = context.watch<AiExplanationProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -86,6 +97,17 @@ class _TopBar extends StatelessWidget {
           const SizedBox(width: 20),
           const Expanded(child: SearchField()),
           const SizedBox(width: 8),
+          IconButton(
+            tooltip: aiPanel.isOpen ? '隐藏 AI 解释面板' : '显示 AI 解释面板',
+            onPressed: aiPanel.toggle,
+            icon: Icon(
+              aiPanel.isOpen
+                  ? Icons.auto_awesome_rounded
+                  : Icons.auto_awesome_outlined,
+              size: 20,
+              color: aiPanel.isOpen ? scheme.primary : null,
+            ),
+          ),
           IconButton(
             tooltip: isDark ? '切换到浅色模式' : '切换到深色模式',
             onPressed: () => settings.setTheme(isDark ? 'light' : 'dark'),

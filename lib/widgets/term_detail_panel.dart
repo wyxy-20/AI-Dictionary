@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/term.dart';
+import '../providers/ai_explanation_provider.dart';
 import '../providers/dictionary_provider.dart';
-import '../services/ai/ai_service.dart';
-import 'ai_explanation_dialog.dart';
 import 'difficulty_stars.dart';
 import 'empty_state.dart';
 
@@ -70,7 +68,8 @@ class TermDetailPanel extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'AI 解释',
-                onPressed: () => _showAiExplain(context, provider, term),
+                onPressed: () =>
+                    context.read<AiExplanationProvider>().generate(term),
                 icon: Icon(Icons.auto_awesome_rounded, color: scheme.primary),
               ),
             ],
@@ -170,7 +169,8 @@ class TermDetailPanel extends StatelessWidget {
               ],
               const SizedBox(height: 22),
               OutlinedButton.icon(
-                onPressed: () => _showAiExplain(context, provider, term),
+                onPressed: () =>
+                    context.read<AiExplanationProvider>().generate(term),
                 icon: const Icon(Icons.auto_awesome_rounded, size: 17),
                 label: const Text('AI 解释'),
                 style: OutlinedButton.styleFrom(
@@ -181,65 +181,6 @@ class TermDetailPanel extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Future<void> _showAiExplain(
-    BuildContext context,
-    DictionaryProvider provider,
-    Term term,
-  ) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const AiLoadingDialog(label: '正在生成AI解释...'),
-    );
-
-    String? content;
-    String? error;
-    try {
-      content = await provider.explainTerm(term);
-    } on AiConfigException catch (e) {
-      error = e.message;
-    } on AiTimeoutException catch (e) {
-      error = e.message;
-    } on AiNetworkException catch (e) {
-      error = e.message;
-    } on AiEmptyResponseException catch (e) {
-      error = e.message;
-    } on Exception {
-      error = 'AI 解释生成失败，请稍后重试。';
-    }
-
-    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
-    if (!context.mounted) return;
-
-    if (error != null) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.auto_awesome_rounded, size: 20),
-              SizedBox(width: 8),
-              Text('AI 解释'),
-            ],
-          ),
-          content: Text(error!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('知道了'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (_) => AiExplanationDialog(term: term, content: content!),
     );
   }
 

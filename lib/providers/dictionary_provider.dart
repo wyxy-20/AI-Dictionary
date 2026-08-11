@@ -188,13 +188,15 @@ class DictionaryProvider extends ChangeNotifier {
   ///
   /// 缓存按 (term_id, term_version, model_name) 校验：
   /// 词条内容更新（version 提升）或切换模型后旧缓存自动失效。
-  Future<String> explainTerm(Term term) async {
+  Future<String> explainTerm(Term term, {bool force = false}) async {
     final id = term.id;
     if (id == null) throw const AiServiceException('词条尚未入库，无法生成解释。');
 
     final config = _aiConfigProvider.config;
-    final cache = await aiCacheDao.findValid(id, term.version, config.modelName);
-    if (cache != null) return cache.content;
+    if (!force) {
+      final cache = await aiCacheDao.findValid(id, term.version, config.modelName);
+      if (cache != null) return cache.content;
+    }
 
     final content = await _aiConfigProvider.buildService().explainTerm(term);
     final now = DateTime.now().millisecondsSinceEpoch;

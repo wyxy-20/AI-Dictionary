@@ -10,6 +10,7 @@ import 'database/ai_settings_dao.dart';
 import 'database/settings_dao.dart';
 import 'database/term_dao.dart';
 import 'providers/ai_config_provider.dart';
+import 'providers/ai_explanation_provider.dart';
 import 'providers/dictionary_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
@@ -72,6 +73,8 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
     searchService: const SearchService(),
     aiConfigProvider: _aiConfigProvider,
   );
+  late final AiExplanationProvider _aiExplanationProvider =
+      AiExplanationProvider(_dictionaryProvider);
 
   @override
   void initState() {
@@ -84,6 +87,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
     _settingsProvider.dispose();
     _aiConfigProvider.dispose();
     _dictionaryProvider.dispose();
+    _aiExplanationProvider.dispose();
     super.dispose();
   }
 
@@ -137,6 +141,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
         ChangeNotifierProvider.value(value: _settingsProvider),
         ChangeNotifierProvider.value(value: _aiConfigProvider),
         ChangeNotifierProvider.value(value: _dictionaryProvider),
+        ChangeNotifierProvider.value(value: _aiExplanationProvider),
       ],
       child: ListenableBuilder(
         listenable: _settingsProvider,
