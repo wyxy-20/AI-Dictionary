@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
@@ -13,6 +17,7 @@ import '../services/ai/openai_compatible_ai_service.dart';
 import '../services/data_export_service.dart';
 import '../services/seed_service.dart';
 import '../services/quick_search/quick_search_controller.dart';
+import '../services/quick_search/hotkey_codec.dart';
 
 /// 设置对话框：外观、数据管理、AI 功能预览、关于。
 class SettingsDialog extends StatefulWidget {
@@ -377,39 +382,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 },
                         ),
                         const Divider(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  s.quickSearchHotkeyLabel,
-                                  style: const TextStyle(fontSize: 13.5),
-                                ),
-                              ),
-                              DropdownButton<String>(
-                                value: settings.settings.quickSearchHotkey,
-                                underline: const SizedBox.shrink(),
-                                items: [
-                                  for (final preset
-                                      in QuickSearchController.hotkeyPresets.keys)
-                                    DropdownMenuItem(
-                                      value: preset,
-                                      child: Text(preset),
-                                    ),
-                                ],
-                                onChanged: _busy
-                                    ? null
-                                    : (value) async {
-                                        if (value == null) return;
-                                        final quickSearch =
-                                            context.read<QuickSearchController>();
-                                        await settings.setQuickSearchHotkey(value);
-                                        await quickSearch.syncRegistration();
-                                      },
-                              ),
-                            ],
-                          ),
+                        _HotkeyRecorderTile(
+                          current: settings.settings.quickSearchHotkey,
+                          enabled: !_busy,
+                          onRecorded: (hotKey) async {
+                            final encoded = QuickSearchHotkeyCodec.encode(hotKey);
+                            if (encoded == null) return;
+                            final quickSearch =
+                                context.read<QuickSearchController>();
+                            await settings.setQuickSearchHotkey(encoded);
+                            await quickSearch.syncRegistration();
+                          },
                         ),
                         const Divider(),
                         Padding(
@@ -748,6 +731,140 @@ class _QuickSearchStatus extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// 自定义全局快捷键录制器：点击后进入录制状态，按下任意组合键即保存。
+class _HotkeyRecorderTile extends StatefulWidget {
+  const _HotkeyRecorderTile({
+    required this.current,
+    required this.onRecorded,
+    this.enabled = true,
+  });
+
+  final String current;
+  final Future<void> Function(HotKey hotKey) onRecorded;
+  final bool enabled;
+
+  @override
+  State<_HotkeyRecorderTile> createState() => _HotkeyRecorderTileState();
+}
+
+class _HotkeyRecorderTileState extends State<_HotkeyRecorderTile> {
+  bool _recording = false;
+  String? _message;
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_onKeyEvent);
+    super.dispose();
+  }
+
+  void _start() {
+    if (_recording) return;
+    setState(() {
+      _recording = true;
+      _message = null;
+    });
+    HardwareKeyboard.instance.addHandler(_onKeyEvent);
+  }
+
+  Future<void> _stop() async {
+    HardwareKeyboard.instance.removeHandler(_onKeyEvent);
+    if (mounted) setState(() => _recording = false);
+  }
+
+  bool _onKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    final physicalKey = event.physicalKey;
+    if (physicalKey == PhysicalKeyboardKey.escape) {
+      unawaited(_stop());
+      return true;
+    }
+    final pressed = HardwareKeyboard.instance.physicalKeysPressed;
+    // 仅支持 Ctrl / Alt / Shift / Win，忽略 CapsLock、Fn 等修饰键。
+    const supportedModifiers = [
+      HotKeyModifier.control,
+      HotKeyModifier.alt,
+      HotKeyModifier.shift,
+      HotKeyModifier.meta,
+    ];
+    final modifiers = supportedModifiers
+        .where((m) => m.physicalKeys.any(pressed.contains))
+        .where((m) => !m.physicalKeys.contains(physicalKey))
+        .toList();
+    final hotKey = HotKey(
+      key: physicalKey,
+      modifiers: modifiers.isEmpty ? null : modifiers,
+    );
+    if (!QuickSearchHotkeyCodec.isValid(hotKey)) {
+      if (mounted) {
+        // 按键处理器在 build 之外，不能用 context.watch。
+        final language = context.read<SettingsProvider>().settings.language;
+        setState(() {
+          _message = AppStrings(language).quickSearchInvalidHotkey;
+        });
+      }
+      return true;
+    }
+    unawaited(_stop());
+    unawaited(widget.onRecorded(hotKey));
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
+    final label = QuickSearchHotkeyCodec.display(widget.current);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  s.quickSearchHotkeyLabel,
+                  style: const TextStyle(fontSize: 13.5),
+                ),
+              ),
+              if (_recording)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      s.quickSearchRecording,
+                      style: TextStyle(fontSize: 12.5, color: scheme.primary),
+                    ),
+                  ],
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: widget.enabled ? _start : null,
+                  icon: const Icon(Icons.keyboard_alt_outlined, size: 16),
+                  label: Text(label),
+                ),
+            ],
+          ),
+          if (_message != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                _message!,
+                style: TextStyle(fontSize: 11, color: scheme.error),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

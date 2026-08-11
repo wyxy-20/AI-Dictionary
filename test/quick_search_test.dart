@@ -9,6 +9,7 @@ import 'package:ai_dictionary/providers/ai_explanation_provider.dart';
 import 'package:ai_dictionary/providers/dictionary_provider.dart';
 import 'package:ai_dictionary/providers/settings_provider.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
+import 'package:ai_dictionary/screens/quick_search_window.dart';
 import 'package:ai_dictionary/services/quick_search/quick_search_controller.dart';
 import 'package:ai_dictionary/widgets/quick_search_dialog.dart';
 import 'package:flutter/material.dart';
@@ -156,13 +157,140 @@ void main() {
     await tester.pumpAndSettle();
     expect(settings.settings.quickSearchEnabled, isTrue);
 
-    // 切换预设
+    // 自定义快捷键录制：点击当前组合进入录制，再按 Alt+K
     await tester.ensureVisible(find.text('Ctrl+K'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ctrl+K'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('请按下新的快捷键组合…（Esc 取消）'), findsOneWidget);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Alt+K').last);
-    await tester.pumpAndSettle();
+
     expect(settings.settings.quickSearchHotkey, 'Alt+K');
+    expect(find.text('Alt+K'), findsOneWidget);
+  });
+
+  testWidgets('悬浮搜索窗口可渲染并支持输入', (tester) async {
+    tester.view.physicalSize = const Size(560, 460);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const QuickSearchWindowApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('输入关键词开始搜索…'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'rag');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('悬浮窗 Esc 隐藏、Enter 选中词条', (tester) async {
+    tester.view.physicalSize = const Size(560, 460);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final windowCalls = <String>[];
+    final channelCalls = <String>[];
+    final messenger = TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('window_manager'),
+      (call) async {
+        windowCalls.add(call.method);
+        if (call.method == 'ensureInitialized') return true;
+        if (call.method == 'isMinimized') return false;
+        if (call.method == 'show' ||
+            call.method == 'hide' ||
+            call.method == 'focus' ||
+            call.method == 'restore') {
+          return true;
+        }
+        return null;
+      },
+    );
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('mixin.one/desktop_multi_window'),
+      (call) async => null,
+    );
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('mixin.one/desktop_multi_window/channels'),
+      (call) async {
+        if (call.method == 'invokeMethod') {
+          final args = (call.arguments as Map).cast<String, dynamic>();
+          channelCalls.add(args['method'] as String);
+          switch (args['method']) {
+            case 'search':
+              return {
+                'results': [
+                  {
+                    'englishName': 'RAG',
+                    'chineseName': '检索增强生成',
+                    'category': '技术',
+                    'difficulty': 2,
+                    'letter': 'R',
+                  },
+                ],
+              };
+            case 'selectTerm':
+              return true;
+            case 'getState':
+              return {'theme': 'light', 'language': 'zh'};
+          }
+        }
+        if (call.method == 'registerMethodHandler') return true;
+        return null;
+      },
+    );
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(const MethodChannel('window_manager'), null);
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('mixin.one/desktop_multi_window'),
+        null,
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('mixin.one/desktop_multi_window/channels'),
+        null,
+      );
+    });
+
+    await tester.pumpWidget(const QuickSearchWindowApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(find.byType(TextField), 'rag');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('RAG'), findsOneWidget);
+    expect(channelCalls, contains('search'));
+
+    // Esc 隐藏浮窗
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(windowCalls, contains('hide'));
+
+    // 再次显示，Enter 选中词条
+    windowCalls.clear();
+    channelCalls.clear();
+    await quickSearchOverlayKey.currentState?.showFromMain();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(windowCalls, contains('show'));
+    await tester.enterText(find.byType(TextField), 'rag');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(channelCalls, contains('selectTerm'));
+    expect(windowCalls, contains('hide'));
   });
 }

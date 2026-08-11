@@ -1,23 +1,35 @@
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
+import '../../models/term.dart';
 import '../../providers/dictionary_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../services/search_service.dart';
 import '../../widgets/quick_search_dialog.dart';
+import 'hotkey_codec.dart';
+import 'quick_search_channels.dart';
 
 /// 全局快捷搜索控制器：
-/// 注册系统级快捷键（任意界面按下即弹出搜索弹窗），并在设置变更后重注册。
+///
+/// - 注册系统级全局热键（任意自定义组合），在任何应用（如看视频时）按
+///   下都会触发；
+/// - 触发后打开一个置顶的悬浮搜索子窗口（desktop_multi_window），不再受
+///   主窗口束缚；
+/// - 子窗口通过 `ai_dict/quick_search/main` 通道请求搜索/选中词条；
+/// - 平台不可用（如测试环境）时回退为应用内弹窗。
 class QuickSearchController extends ChangeNotifier {
   QuickSearchController(this._settingsProvider, this._dictionaryProvider);
 
   final SettingsProvider _settingsProvider;
   final DictionaryProvider _dictionaryProvider;
 
-  /// 用于在全局快捷键触发时弹出搜索弹窗。
+  /// 用于在应用内弹窗回退时显示 [QuickSearchDialog]。
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  /// 测试环境置为 true 可跳过平台插件调用（避免挂起计时器）。
+  /// 测试环境置为 true 可跳过插件调用（避免挂起计时器）。
   static bool debugDisablePlatform = false;
 
   bool _registered = false;
@@ -26,45 +38,84 @@ class QuickSearchController extends ChangeNotifier {
   String? _lastError;
   String? get lastError => _lastError;
 
-  /// 可配置的快捷键预设：显示名 -> HotKey 描述字符串。
-  static const Map<String, String> hotkeyPresets = {
-    'Ctrl+K': 'Ctrl+K',
-    'Ctrl+Shift+K': 'Ctrl+Shift+K',
-    'Alt+K': 'Alt+K',
-    'Ctrl+Alt+K': 'Ctrl+Alt+K',
-    'F8': 'F8',
-    'F9': 'F9',
-  };
+  bool _started = false;
+  bool _busy = false;
 
-  /// 解析预设字符串为 HotKey；无法解析返回 null。
-  static HotKey? parseHotKey(String preset) {
-    final modifiers = <HotKeyModifier>[];
-    var keyPart = preset;
-    if (preset.contains('Ctrl')) {
-      modifiers.add(HotKeyModifier.control);
-      keyPart = keyPart.replaceAll('Ctrl', '').trim();
-    }
-    if (preset.contains('Shift')) {
-      modifiers.add(HotKeyModifier.shift);
-      keyPart = keyPart.replaceAll('Shift', '').trim();
-    }
-    if (preset.contains('Alt')) {
-      modifiers.add(HotKeyModifier.alt);
-      keyPart = keyPart.replaceAll('Alt', '').trim();
-    }
-    keyPart = keyPart.replaceAll('+', '').trim();
+  /// 解析存储的快捷键字符串（兼容旧预设，如 `Ctrl+K`）。
+  static HotKey? parseHotKey(String text) => QuickSearchHotkeyCodec.decode(text);
 
-    final key = switch (keyPart.toUpperCase()) {
-      'K' => LogicalKeyboardKey.keyK,
-      'F8' => LogicalKeyboardKey.f8,
-      'F9' => LogicalKeyboardKey.f9,
-      _ => null,
-    };
-    if (key == null) return null;
-    return HotKey(key: key, modifiers: modifiers.isEmpty ? null : modifiers);
+  /// 启动：注册主窗口侧的跨窗口通道并同步全局热键。
+  Future<void> start() async {
+    if (_started) return;
+    _started = true;
+    _lastError = null;
+    if (!debugDisablePlatform) {
+      try {
+        await quickSearchMainChannel.setMethodCallHandler(_handleMainCall);
+      } catch (e) {
+        _lastError = 'Quick search bridge unavailable: $e';
+      }
+    }
+    await syncRegistration();
   }
 
-  /// 根据当前设置注册 / 注销全局快捷键。
+  /// 主窗口侧通道处理：供悬浮子窗口调用。
+  Future<dynamic> _handleMainCall(MethodCall call) async {
+    switch (call.method) {
+      case 'search':
+        final query = (call.arguments as Map?)?['query'] as String? ?? '';
+        final results = SearchService()
+            .search(_dictionaryProvider.allTerms, query)
+            .take(8)
+            .toList();
+        return {
+          'results': [for (final term in results) _termToMap(term)],
+        };
+      case 'selectTerm':
+        final englishName =
+            (call.arguments as Map?)?['englishName'] as String? ?? '';
+        Term? matched;
+        for (final term in _dictionaryProvider.allTerms) {
+          if (term.englishName == englishName) {
+            matched = term;
+            break;
+          }
+        }
+        if (matched != null) {
+          await _dictionaryProvider.selectTerm(matched);
+          // 在主窗口仍是前台进程时完成聚焦，随后子窗口隐藏，焦点不会丢失。
+          await _focusMainWindow();
+        }
+        return true;
+      case 'getState':
+        final settings = _settingsProvider.settings;
+        return {'theme': settings.theme, 'language': settings.language};
+      default:
+        throw MissingPluginException('Not implemented: ${call.method}');
+    }
+  }
+
+  Map<String, dynamic> _termToMap(Term term) => {
+        'englishName': term.englishName,
+        'chineseName': term.chineseName,
+        'category': term.category,
+        'difficulty': term.difficulty,
+        'letter': term.firstLetter,
+      };
+
+  Future<void> _focusMainWindow() async {
+    try {
+      if (await windowManager.isMinimized()) {
+        await windowManager.restore();
+      }
+      await windowManager.show();
+      await windowManager.focus();
+    } catch (_) {
+      // 聚焦失败不阻塞词条选择。
+    }
+  }
+
+  /// 根据当前设置注册 / 注销全局热键。
   Future<void> syncRegistration() async {
     _lastError = null;
     if (debugDisablePlatform) {
@@ -81,7 +132,8 @@ class QuickSearchController extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      final hotKey = parseHotKey(_settingsProvider.settings.quickSearchHotkey);
+      final hotKey =
+          QuickSearchHotkeyCodec.decode(_settingsProvider.settings.quickSearchHotkey);
       if (hotKey == null) {
         _lastError = '快捷键配置无效';
         _registered = false;
@@ -91,7 +143,10 @@ class QuickSearchController extends ChangeNotifier {
       await hotKeyManager
           .register(
             hotKey,
-            keyDownHandler: (_) => showQuickSearch(),
+            keyDownHandler: (_) {
+              // 全局热键回调：显示悬浮搜索窗口。
+              showQuickSearch();
+            },
           )
           .timeout(const Duration(seconds: 2), onTimeout: () {});
       _registered = true;
@@ -102,8 +157,72 @@ class QuickSearchController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 弹出快捷搜索弹窗（全局快捷键回调与测试入口）。
-  void showQuickSearch() {
+  /// 显示快捷搜索：
+  /// 已存在子窗口则通知其显示；否则创建一个置顶悬浮窗口。
+  Future<void> showQuickSearch() async {
+    if (debugDisablePlatform) {
+      _showInAppDialog();
+      return;
+    }
+    if (_busy) return;
+    _busy = true;
+    try {
+      final existing = await _findQuickSearchWindow();
+      if (existing != null) {
+        await _invokeShowWithRetry(existing);
+      } else {
+        try {
+          await WindowController.create(
+            WindowConfiguration(
+              hiddenAtLaunch: true,
+              arguments: quickSearchWindowArgument,
+            ),
+          );
+          // 子窗口启动完成后会自行显示并置顶。
+        } catch (e) {
+          _lastError = e.toString();
+          _showInAppDialog();
+        }
+      }
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<WindowController?> _findQuickSearchWindow() async {
+    try {
+      final windows = await WindowController.getAll();
+      for (final window in windows) {
+        if (window.arguments == quickSearchWindowArgument) return window;
+      }
+    } catch (_) {
+      // 插件不可用时返回 null，走弹窗回退。
+    }
+    return null;
+  }
+
+  /// 子窗口刚创建时其 Dart 层尚未就绪，重试几次通知显示；
+  /// 全部失败则退化为原生 show（至少让窗口可见）。
+  Future<void> _invokeShowWithRetry(WindowController window) async {
+    Object? lastError;
+    for (var attempt = 0; attempt < 15; attempt++) {
+      try {
+        await window.invokeMethod('show');
+        return;
+      } catch (e) {
+        lastError = e;
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      }
+    }
+    _lastError = lastError?.toString();
+    try {
+      await window.show();
+    } catch (_) {
+      // 忽略：下次热键会重新尝试。
+    }
+  }
+
+  void _showInAppDialog() {
     final navigator = navigatorKey.currentState;
     if (navigator == null) return;
     showDialog<void>(

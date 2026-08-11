@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -19,9 +20,23 @@ import 'services/search_service.dart';
 import 'services/seed_service.dart';
 import 'services/update_service.dart';
 import 'services/quick_search/quick_search_controller.dart';
+import 'services/quick_search/quick_search_channels.dart';
+import 'screens/quick_search_window.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // desktop_multi_window：同一进程可包含多个窗口，子窗口（悬浮快捷搜索）
+  // 通过启动参数区分，运行各自的 UI，避免重复初始化主应用。
+  try {
+    final windowController = await WindowController.fromCurrentEngine();
+    if (windowController.arguments == quickSearchWindowArgument) {
+      await runQuickSearchWindow(windowController);
+      return;
+    }
+  } catch (_) {
+    // 非 desktop_multi_window 环境（例如测试）继续按主窗口启动。
+  }
 
   // ---- Desktop window configuration (resizable, centered) ----
   await windowManager.ensureInitialized();
@@ -127,7 +142,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       await _settingsProvider.load();
       await _aiConfigProvider.load();
       await _dictionaryProvider.load();
-      await _quickSearchController.syncRegistration();
+      await _quickSearchController.start();
     } catch (_) {
       // 保持空状态进入主界面。
     }

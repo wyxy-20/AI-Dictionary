@@ -171,7 +171,30 @@ class AppStrings {
   String get quickSearchHotkeyLabel => _p('快捷键', 'Shortcut');
   String get quickSearchStatusRegistered => _p('快捷键已注册', 'Shortcut registered');
   String get quickSearchStatusNotRegistered => _p('快捷键未注册', 'Shortcut not registered');
-  String get quickSearchHint => _p('设置后可在任意界面按快捷键弹出搜索', 'Press the shortcut anywhere to open quick search');
+  String get quickSearchHint => _p(
+        '在任意应用（如看视频时）按快捷键，即可调出全局悬浮搜索',
+        'Press the shortcut anywhere (even while watching videos) to open the global floating search',
+      );
+  String get quickSearchSearchHint => _p(
+        '输入关键词搜索词条',
+        'Type to search terms',
+      );
+  String get quickSearchRecording => _p(
+        '请按下新的快捷键组合…（Esc 取消）',
+        'Press the new shortcut… (Esc to cancel)',
+      );
+  String get quickSearchInvalidHotkey => _p(
+        '无效快捷键：请包含 Ctrl / Alt / Shift / Win，或使用 F1–F12',
+        'Invalid shortcut: use Ctrl / Alt / Shift / Win, or F1–F12',
+      );
+  String get quickSearchShortcutHint => _p(
+        '↑↓ 选择 · Enter 打开 · Esc 关闭',
+        '↑↓ select · Enter open · Esc close',
+      );
+  String get quickSearchMainUnavailable => _p(
+        '主程序不可用，请稍后重试',
+        'Main app unavailable, try again later',
+      );
   String get quickSearchTitle => _p('快速搜索词条', 'Quick Search Terms');
   String get quickSearchTypeToStart => _p('输入关键词开始搜索…', 'Type to start searching…');
   String get quickSearchNoResults => _p('未找到匹配词条', 'No matching terms');
