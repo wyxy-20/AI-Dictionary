@@ -8,7 +8,10 @@ import 'dictionary_provider.dart';
 enum AiExplanationStatus { idle, loading, success, error }
 
 class AiExplanationProvider extends ChangeNotifier {
-  AiExplanationProvider(this._dictionaryProvider);
+  AiExplanationProvider(this._dictionaryProvider) {
+    // 跟随词条切换：面板打开时，选中词条变化自动加载对应解释。
+    _dictionaryProvider.addListener(_onDictionaryChanged);
+  }
 
   final DictionaryProvider _dictionaryProvider;
 
@@ -17,6 +20,7 @@ class AiExplanationProvider extends ChangeNotifier {
   Term? _term;
   String? _content;
   String? _error;
+  int? _handledTermId;
 
   bool get isOpen => _isOpen;
   AiExplanationStatus get status => _status;
@@ -27,11 +31,17 @@ class AiExplanationProvider extends ChangeNotifier {
   void toggle() {
     _isOpen = !_isOpen;
     notifyListeners();
+    _syncWithSelection();
   }
 
   void open() {
+    if (_isOpen) {
+      _syncWithSelection();
+      return;
+    }
     _isOpen = true;
     notifyListeners();
+    _syncWithSelection();
   }
 
   void close() {
@@ -43,6 +53,7 @@ class AiExplanationProvider extends ChangeNotifier {
   ///
   /// [force] 为 true 时忽略缓存，重新调用 AI 并覆盖缓存。
   Future<void> generate(Term term, {bool force = false}) async {
+    _handledTermId = term.id;
     _term = term;
     _status = AiExplanationStatus.loading;
     _content = null;
@@ -59,6 +70,26 @@ class AiExplanationProvider extends ChangeNotifier {
       _status = AiExplanationStatus.error;
     }
     notifyListeners();
+  }
+
+  /// 面板打开时，把侧边栏同步到当前选中的词条（缓存优先）。
+  void _syncWithSelection() {
+    final selected = _dictionaryProvider.selectedTerm;
+    final selectedId = selected?.id;
+    if (!_isOpen || selectedId == null) return;
+    if (_handledTermId == selectedId) return;
+    _handledTermId = selectedId;
+    generate(selected!);
+  }
+
+  void _onDictionaryChanged() {
+    _syncWithSelection();
+  }
+
+  @override
+  void dispose() {
+    _dictionaryProvider.removeListener(_onDictionaryChanged);
+    super.dispose();
   }
 
   static String _friendlyMessage(Object error) {

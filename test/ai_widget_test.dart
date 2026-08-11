@@ -173,4 +173,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AiExplanationPanel), findsNothing);
   });
+
+  testWidgets('侧边栏打开时切换词条会自动跟随更新（缓存优先）', (tester) async {
+    setDesktopView(tester);
+    await TermDao(db).insertAll([makeTerm('RAG', '检索增强生成')]);
+
+    final service = StubExplainService();
+    final aiConfig = AiConfigProvider(
+      AiSettingsDao(db),
+      serviceFactory: (_) => service,
+    );
+    await aiConfig.load();
+
+    await tester.pumpWidget(buildApp(db, aiConfig));
+    await tester.pumpAndSettle();
+
+    // 打开 Agent 的 AI 解释
+    await tester.tap(find.text('Agent'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('AI 解释'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 1);
+    expect(find.textContaining('Agent 的简单解释'), findsOneWidget);
+
+    // 切换到 RAG：侧边栏应自动跟随
+    await tester.tap(find.text('RAG'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 2, reason: '切换词条后应为新词条生成');
+    expect(find.textContaining('RAG 的简单解释'), findsOneWidget);
+
+    // 切回 Agent：命中缓存，不重复调用 API
+    await tester.tap(find.text('Agent'));
+    await tester.pumpAndSettle();
+    expect(service.calls, 2, reason: '切回已解释词条应命中缓存');
+    expect(find.textContaining('Agent 的简单解释'), findsOneWidget);
+  });
 }
