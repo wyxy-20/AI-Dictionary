@@ -9,6 +9,7 @@ import 'package:ai_dictionary/providers/ai_explanation_provider.dart';
 import 'package:ai_dictionary/providers/dictionary_provider.dart';
 import 'package:ai_dictionary/providers/settings_provider.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
+import 'package:ai_dictionary/services/quick_search/quick_search_controller.dart';
 import 'package:ai_dictionary/widgets/left_nav_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +50,12 @@ Widget buildApp(AppDatabase db) {
       ChangeNotifierProvider(
         create: (ctx) => AiExplanationProvider(ctx.read<DictionaryProvider>()),
       ),
+      ChangeNotifierProvider(
+        create: (ctx) => QuickSearchController(
+          ctx.read<SettingsProvider>(),
+          ctx.read<DictionaryProvider>(),
+        ),
+      ),
     ],
     child: const MaterialApp(home: HomeScreen()),
   );
@@ -61,6 +68,7 @@ void main() {
 
   setUp(() async {
     ensureSqliteAvailable();
+    QuickSearchController.debugDisablePlatform = true;
     db = AppDatabase(factory: databaseFactoryFfiNoIsolate);
     await db.openInMemory();
     await TermDao(db).insertAll([

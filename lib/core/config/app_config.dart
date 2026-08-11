@@ -5,10 +5,10 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.4.0';
+  static const String version = '1.5.0';
 
   static const String databaseFileName = 'ai_dictionary.db';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
 
   /// 内置 JSON 词库的版本号（本地词典初始版本）。
   static const String seedDictionaryVersion = '1.0.0';

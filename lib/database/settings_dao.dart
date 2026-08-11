@@ -32,4 +32,20 @@ class SettingsDao {
   Future<void> updateLanguage(String language) async {
     await _db.update('settings', {'language': language}, where: 'id = 1');
   }
+
+  Future<void> updateQuickSearchHotkey(String hotkey) async {
+    await _db.update(
+      'settings',
+      {'quick_search_hotkey': hotkey},
+      where: 'id = 1',
+    );
+  }
+
+  Future<void> updateQuickSearchEnabled(bool enabled) async {
+    await _db.update(
+      'settings',
+      {'quick_search_enabled': enabled ? 1 : 0},
+      where: 'id = 1',
+    );
+  }
 }

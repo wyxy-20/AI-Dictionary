@@ -100,7 +100,9 @@ class AppDatabase {
       CREATE TABLE settings (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         theme TEXT NOT NULL DEFAULT 'system',
-        language TEXT NOT NULL DEFAULT 'zh'
+        language TEXT NOT NULL DEFAULT 'zh',
+        quick_search_hotkey TEXT NOT NULL DEFAULT 'Ctrl+K',
+        quick_search_enabled INTEGER NOT NULL DEFAULT 0
       )
     ''');
     await _createVersionTable(db);
@@ -116,6 +118,23 @@ class AppDatabase {
     if (oldVersion < 3) {
       await _addTermVersionColumn(db);
       await _createAiTables(db);
+    }
+    if (oldVersion < 4) {
+      await _addQuickSearchColumns(db);
+    }
+  }
+
+  Future<void> _addQuickSearchColumns(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(settings)');
+    if (!columns.any((c) => c['name'] == 'quick_search_hotkey')) {
+      await db.execute(
+        "ALTER TABLE settings ADD COLUMN quick_search_hotkey TEXT NOT NULL DEFAULT 'Ctrl+K'",
+      );
+    }
+    if (!columns.any((c) => c['name'] == 'quick_search_enabled')) {
+      await db.execute(
+        'ALTER TABLE settings ADD COLUMN quick_search_enabled INTEGER NOT NULL DEFAULT 0',
+      );
     }
   }
 

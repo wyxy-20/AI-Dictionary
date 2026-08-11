@@ -164,4 +164,16 @@ class AppStrings {
         'Click "AI Explain" in term details to generate an explanation.',
       );
   String get noAiRecordGeneric => _p('该词条还没有 AI 解释记录', 'No saved AI explanation for this term');
+
+  // ---------- 快捷搜索 ----------
+  String get quickSearchSection => _p('快捷搜索', 'Quick Search');
+  String get quickSearchEnabledLabel => _p('启用全局快捷键', 'Enable global shortcut');
+  String get quickSearchHotkeyLabel => _p('快捷键', 'Shortcut');
+  String get quickSearchStatusRegistered => _p('快捷键已注册', 'Shortcut registered');
+  String get quickSearchStatusNotRegistered => _p('快捷键未注册', 'Shortcut not registered');
+  String get quickSearchHint => _p('设置后可在任意界面按快捷键弹出搜索', 'Press the shortcut anywhere to open quick search');
+  String get quickSearchTitle => _p('快速搜索词条', 'Quick Search Terms');
+  String get quickSearchTypeToStart => _p('输入关键词开始搜索…', 'Type to start searching…');
+  String get quickSearchNoResults => _p('未找到匹配词条', 'No matching terms');
+  String get quickSearchReRegister => _p('重新注册', 'Re-register');
 }

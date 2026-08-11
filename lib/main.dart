@@ -18,6 +18,7 @@ import 'screens/splash_screen.dart';
 import 'services/search_service.dart';
 import 'services/seed_service.dart';
 import 'services/update_service.dart';
+import 'services/quick_search/quick_search_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,6 +76,8 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
   );
   late final AiExplanationProvider _aiExplanationProvider =
       AiExplanationProvider(_dictionaryProvider);
+  late final QuickSearchController _quickSearchController =
+      QuickSearchController(_settingsProvider, _dictionaryProvider);
 
   @override
   void initState() {
@@ -88,6 +91,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
     _aiConfigProvider.dispose();
     _dictionaryProvider.dispose();
     _aiExplanationProvider.dispose();
+    _quickSearchController.dispose();
     super.dispose();
   }
 
@@ -123,6 +127,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       await _settingsProvider.load();
       await _aiConfigProvider.load();
       await _dictionaryProvider.load();
+      await _quickSearchController.syncRegistration();
     } catch (_) {
       // 保持空状态进入主界面。
     }
@@ -144,6 +149,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
         ChangeNotifierProvider.value(value: _aiConfigProvider),
         ChangeNotifierProvider.value(value: _dictionaryProvider),
         ChangeNotifierProvider.value(value: _aiExplanationProvider),
+        ChangeNotifierProvider.value(value: _quickSearchController),
       ],
       child: ListenableBuilder(
         listenable: _settingsProvider,
@@ -151,6 +157,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
           return MaterialApp(
             title: AppConfig.appTitle,
             debugShowCheckedModeBanner: false,
+            navigatorKey: _quickSearchController.navigatorKey,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: _settingsProvider.themeMode,

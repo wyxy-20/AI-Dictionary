@@ -4,6 +4,7 @@ import 'package:ai_dictionary/main.dart';
 import 'package:ai_dictionary/models/term.dart';
 import 'package:ai_dictionary/services/update_service.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
+import 'package:ai_dictionary/services/quick_search/quick_search_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -32,6 +33,7 @@ void main() {
 
   setUp(() async {
     ensureSqliteAvailable();
+    QuickSearchController.debugDisablePlatform = true;
     db = AppDatabase(factory: databaseFactoryFfiNoIsolate);
     await db.openInMemory();
     await TermDao(db).insertAll([makeTerm('Agent', '智能体')]);

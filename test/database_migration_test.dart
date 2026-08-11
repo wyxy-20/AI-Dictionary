@@ -91,7 +91,7 @@ void main() {
 
     final userVersion =
         (await db.database.rawQuery('PRAGMA user_version')).first.values.first;
-    expect(userVersion, 3);
+    expect(userVersion, 4);
 
     final columns = await db.database.rawQuery('PRAGMA table_info(terms)');
     expect(columns.map((c) => c['name']), contains('version'));
@@ -114,6 +114,13 @@ void main() {
     expect(history.length, 1);
     final settings = await db.database.query('settings');
     expect(settings.first['theme'], 'dark');
+    final settingsColumns =
+        await db.database.rawQuery('PRAGMA table_info(settings)');
+    final settingsNames = settingsColumns.map((c) => c['name']).toSet();
+    expect(settingsNames, contains('quick_search_hotkey'));
+    expect(settingsNames, contains('quick_search_enabled'));
+    expect(settings.first['quick_search_hotkey'], 'Ctrl+K');
+    expect(settings.first['quick_search_enabled'], 0);
 
     await db.close();
     dir.deleteSync(recursive: true);

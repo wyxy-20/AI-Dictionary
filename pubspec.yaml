@@ -41,6 +41,7 @@ dependencies:
   path: ^1.9.1
   window_manager: ^0.5.2
   http: ^1.2.0
+  hotkey_manager: ^0.2.3
 
 dev_dependencies:
   flutter_test:

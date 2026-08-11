@@ -12,6 +12,7 @@ import '../services/ai/ai_service.dart';
 import '../services/ai/openai_compatible_ai_service.dart';
 import '../services/data_export_service.dart';
 import '../services/seed_service.dart';
+import '../services/quick_search/quick_search_controller.dart';
 
 /// 设置对话框：外观、数据管理、AI 功能预览、关于。
 class SettingsDialog extends StatefulWidget {
@@ -348,6 +349,92 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   const SizedBox(height: 18),
                   _SectionTitle(
+                    icon: Icons.keyboard_command_key_rounded,
+                    title: s.quickSearchSection,
+                  ),
+                  _GroupCard(
+                    child: Column(
+                      children: [
+                        SwitchListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            s.quickSearchEnabledLabel,
+                            style: const TextStyle(fontSize: 13.5),
+                          ),
+                          subtitle: Text(
+                            s.quickSearchHint,
+                            style: const TextStyle(fontSize: 11.5),
+                          ),
+                          value: settings.settings.quickSearchEnabled,
+                          onChanged: _busy
+                              ? null
+                              : (value) async {
+                                  final quickSearch =
+                                      context.read<QuickSearchController>();
+                                  await settings.setQuickSearchEnabled(value);
+                                  await quickSearch.syncRegistration();
+                                },
+                        ),
+                        const Divider(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  s.quickSearchHotkeyLabel,
+                                  style: const TextStyle(fontSize: 13.5),
+                                ),
+                              ),
+                              DropdownButton<String>(
+                                value: settings.settings.quickSearchHotkey,
+                                underline: const SizedBox.shrink(),
+                                items: [
+                                  for (final preset
+                                      in QuickSearchController.hotkeyPresets.keys)
+                                    DropdownMenuItem(
+                                      value: preset,
+                                      child: Text(preset),
+                                    ),
+                                ],
+                                onChanged: _busy
+                                    ? null
+                                    : (value) async {
+                                        if (value == null) return;
+                                        final quickSearch =
+                                            context.read<QuickSearchController>();
+                                        await settings.setQuickSearchHotkey(value);
+                                        await quickSearch.syncRegistration();
+                                      },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _QuickSearchStatus(),
+                              ),
+                              TextButton(
+                                onPressed: _busy
+                                    ? null
+                                    : () => context
+                                        .read<QuickSearchController>()
+                                        .syncRegistration(),
+                                child: Text(s.quickSearchReRegister),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _SectionTitle(
                     icon: Icons.settings_input_component_rounded,
                     title: s.aiServiceSettings,
                   ),
@@ -616,6 +703,51 @@ class _FutureFeatureRow extends StatelessWidget {
       trailing: released
           ? Icon(Icons.check_circle_rounded, size: 16, color: scheme.primary)
           : Icon(Icons.schedule_rounded, size: 16, color: scheme.outline),
+    );
+  }
+}
+
+class _QuickSearchStatus extends StatelessWidget {
+  const _QuickSearchStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<QuickSearchController>();
+    final scheme = Theme.of(context).colorScheme;
+    final s = AppStrings.of(context);
+    final registered = controller.registered;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              registered ? Icons.check_circle_rounded : Icons.error_outline_rounded,
+              size: 14,
+              color: registered ? scheme.primary : scheme.error,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              registered
+                  ? s.quickSearchStatusRegistered
+                  : s.quickSearchStatusNotRegistered,
+              style: TextStyle(
+                fontSize: 12,
+                color: registered ? scheme.onSurfaceVariant : scheme.error,
+              ),
+            ),
+          ],
+        ),
+        if (controller.lastError != null) ...[
+          const SizedBox(height: 3),
+          Text(
+            controller.lastError!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 10.5, color: scheme.outline),
+          ),
+        ],
+      ],
     );
   }
 }

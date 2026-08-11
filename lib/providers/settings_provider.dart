@@ -36,4 +36,16 @@ class SettingsProvider extends ChangeNotifier {
     _settings = _settings.copyWith(language: language);
     notifyListeners();
   }
+
+  Future<void> setQuickSearchHotkey(String hotkey) async {
+    await dao.updateQuickSearchHotkey(hotkey);
+    _settings = _settings.copyWith(quickSearchHotkey: hotkey);
+    notifyListeners();
+  }
+
+  Future<void> setQuickSearchEnabled(bool enabled) async {
+    await dao.updateQuickSearchEnabled(enabled);
+    _settings = _settings.copyWith(quickSearchEnabled: enabled);
+    notifyListeners();
+  }
 }
