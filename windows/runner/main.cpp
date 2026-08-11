@@ -1,4 +1,4 @@
-#include <flutter/dart_project.h>
+﻿#include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
@@ -16,6 +16,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // Initialize COM, so that it is available for use in the library and/or
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+
+  // ---- Single instance ----
+  // 第二个实例启动时，找到已有的主窗口并唤起它，然后直接退出；
+  // 互斥锁句柄保持打开直到进程结束（进程退出时系统自动释放）。
+  HANDLE single_instance_mutex =
+      ::CreateMutexW(nullptr, FALSE, L"Local\\AI_Dictionary_SingleInstance");
+  (void)single_instance_mutex;  // 仅用于持有句柄，防编译器警告。
+  if (::GetLastError() == ERROR_ALREADY_EXISTS) {
+    HWND existing = ::FindWindowW(nullptr, L"AI Dictionary · AI时代词典");
+    if (existing != nullptr) {
+      if (::IsIconic(existing)) {
+        ::ShowWindow(existing, SW_RESTORE);
+      }
+      ::ShowWindow(existing, SW_SHOW);
+      ::SetForegroundWindow(existing);
+    }
+    return EXIT_SUCCESS;
+  }
 
   flutter::DartProject project(L"data");
 

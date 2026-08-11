@@ -189,6 +189,22 @@ class QuickSearchController extends ChangeNotifier {
     }
   }
 
+  /// 隐藏已打开的悬浮搜索窗（例如主窗口关闭到托盘时）。
+  Future<void> hideQuickSearch() async {
+    if (debugDisablePlatform) return;
+    final existing = await _findQuickSearchWindow();
+    if (existing == null) return;
+    try {
+      await existing.invokeMethod('hide');
+    } catch (_) {
+      try {
+        await existing.hide();
+      } catch (_) {
+        // 忽略。
+      }
+    }
+  }
+
   Future<WindowController?> _findQuickSearchWindow() async {
     try {
       final windows = await WindowController.getAll();

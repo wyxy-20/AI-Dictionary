@@ -18,6 +18,7 @@ import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/search_service.dart';
 import 'services/seed_service.dart';
+import 'services/tray_service.dart';
 import 'services/update_service.dart';
 import 'services/quick_search/quick_search_controller.dart';
 import 'services/quick_search/quick_search_channels.dart';
@@ -51,6 +52,8 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+  // 点击关闭按钮时由 Dart 层决定隐藏到托盘，而不是退出进程。
+  await windowManager.setPreventClose(true);
 
   // 数据库在启动页中初始化（展示同步状态）。
   final database = AppDatabase();
@@ -93,6 +96,10 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       AiExplanationProvider(_dictionaryProvider);
   late final QuickSearchController _quickSearchController =
       QuickSearchController(_settingsProvider, _dictionaryProvider);
+  late final TrayService _trayService = TrayService(
+    onShowQuickSearch: () => _quickSearchController.showQuickSearch(),
+    onHideQuickSearch: () => _quickSearchController.hideQuickSearch(),
+  );
 
   @override
   void initState() {
@@ -107,6 +114,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
     _dictionaryProvider.dispose();
     _aiExplanationProvider.dispose();
     _quickSearchController.dispose();
+    _trayService.dispose();
     super.dispose();
   }
 
@@ -143,6 +151,7 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       await _aiConfigProvider.load();
       await _dictionaryProvider.load();
       await _quickSearchController.start();
+      await _trayService.init();
     } catch (_) {
       // 保持空状态进入主界面。
     }
