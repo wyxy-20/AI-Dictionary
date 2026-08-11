@@ -44,6 +44,9 @@ abstract class AiService {
   /// AI 解释：面向零基础用户解释一个术语（固定输出格式）。
   Future<String> explainTerm(Term term);
 
+  /// 测试连接：用最小请求验证配置（地址 / 密钥 / 模型）是否可用。
+  Future<String> testConnection();
+
   /// AI 问答：回答用户关于 AI 概念的问题。
   Future<String> askQuestion(String question);
 
@@ -69,6 +72,9 @@ class StubAiService implements AiService {
         '【为什么重要】\n理解 ${term.englishName} 是学习 AI 的重要一步。\n\n'
         '【相关概念】\n${term.relatedTerms.take(3).join('、')}';
   }
+
+  @override
+  Future<String> testConnection() async => '配置可用（Stub 模式）';
 
   @override
   Future<String> askQuestion(String question) async {

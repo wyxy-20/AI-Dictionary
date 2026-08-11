@@ -7,6 +7,8 @@ import '../models/ai_config.dart';
 import '../providers/ai_config_provider.dart';
 import '../providers/dictionary_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/ai/ai_service.dart';
+import '../services/ai/openai_compatible_ai_service.dart';
 import '../services/data_export_service.dart';
 import '../services/seed_service.dart';
 
@@ -61,6 +63,68 @@ class _SettingsDialogState extends State<SettingsDialog> {
         );
       }
     });
+  }
+
+  Future<void> _testAiConnection() async {
+    final baseUrl = _baseUrlCtrl.text.trim();
+    final apiKey = _apiKeyCtrl.text.trim();
+    final modelName = _modelCtrl.text.trim();
+    if (baseUrl.isEmpty || modelName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先填写 AI 服务地址与模型名称')),
+      );
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final service = OpenAiCompatibleAiService(
+        AiConfig(baseUrl: baseUrl, apiKey: apiKey, modelName: modelName),
+      );
+      final reply = await service.testConnection();
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('连接成功'),
+          content: Text('AI 服务连接正常。\n\n模型回复：$reply'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('知道了'),
+            ),
+          ],
+        ),
+      );
+    } on AiConfigException catch (e) {
+      _showAiTestError(e.message);
+    } on AiTimeoutException catch (e) {
+      _showAiTestError(e.message);
+    } on AiNetworkException catch (e) {
+      _showAiTestError(e.message);
+    } on AiServiceException catch (e) {
+      _showAiTestError(e.message);
+    } on Exception catch (e) {
+      _showAiTestError('连接失败：$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _showAiTestError(String message) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('连接失败'),
+        content: SelectableText(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('知道了'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -279,7 +343,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           enabled: !_busy,
                           decoration: const InputDecoration(
                             labelText: 'AI 服务地址（Base URL）',
-                            hintText: 'https://api.openai.com/v1',
+                            hintText: '如 https://api.deepseek.com 或 https://api.openai.com/v1',
                             isDense: true,
                           ),
                         ),
@@ -311,15 +375,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           enabled: !_busy,
                           decoration: const InputDecoration(
                             labelText: '模型名称（Model）',
-                            hintText: 'gpt-4o-mini / deepseek-chat / qwen-plus',
+                            hintText: 'deepseek-chat / gpt-4o-mini / qwen-plus',
                             isDense: true,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        FilledButton.icon(
-                          onPressed: _busy ? null : _saveAiConfig,
-                          icon: const Icon(Icons.save_rounded, size: 16),
-                          label: const Text('保存 AI 服务配置'),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _busy ? null : _testAiConnection,
+                                icon: const Icon(Icons.wifi_tethering_rounded, size: 16),
+                                label: const Text('测试连接'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: _busy ? null : _saveAiConfig,
+                                icon: const Icon(Icons.save_rounded, size: 16),
+                                label: const Text('保存配置'),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

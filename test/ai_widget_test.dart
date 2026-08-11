@@ -33,6 +33,9 @@ class StubExplainService implements AiService {
 
   @override
   Future<List<String>> learningPath(String goal) async => const [];
+
+  @override
+  Future<String> testConnection() async => 'ok';
 }
 
 Term makeTerm(String en, String zh) {

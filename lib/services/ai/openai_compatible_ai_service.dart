@@ -20,7 +20,31 @@ class OpenAiCompatibleAiService implements AiService {
   final AiConfig config;
   final http.Client? client;
 
-  Uri get _endpoint => Uri.parse('${config.baseUrl.trimRight()}/chat/completions');
+  /// 兼容多种填法：尾随斜杠、已带 /chat/completions 等。
+  String get _endpoint {
+    var base = config.baseUrl.trim();
+    while (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1);
+    }
+    if (base.isEmpty || base.endsWith('/chat/completions')) return base;
+    return '$base/chat/completions';
+  }
+
+  @override
+  Future<String> testConnection() async {
+    if (!config.isConfigured) {
+      throw const AiConfigException();
+    }
+    final payload = {
+      'model': config.modelName,
+      'messages': [
+        {'role': 'user', 'content': '你好，请回复"连接成功"四个字。'},
+      ],
+      'max_tokens': 16,
+      'temperature': 0,
+    };
+    return _chat(payload);
+  }
 
   @override
   Future<String> explainTerm(Term term) async {
@@ -50,7 +74,7 @@ class OpenAiCompatibleAiService implements AiService {
     try {
       final response = await httpClient
           .post(
-            _endpoint,
+            Uri.parse(_endpoint),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer ${config.apiKey}',
@@ -60,10 +84,15 @@ class OpenAiCompatibleAiService implements AiService {
           .timeout(AppConfig.aiRequestTimeout);
 
       if (response.statusCode == 401 || response.statusCode == 403) {
-        throw const AiConfigException('API Key 无效，请检查 AI 服务配置。');
+        throw AiConfigException(
+          'API Key 无效或已过期（HTTP ${response.statusCode}），请检查 AI 服务配置。',
+        );
       }
       if (response.statusCode != 200) {
-        throw AiServiceException('AI 服务返回异常（HTTP ${response.statusCode}）。');
+        final detail = _extractErrorDetail(response);
+        throw AiServiceException(
+          'AI 服务返回异常（HTTP ${response.statusCode}）$detail',
+        );
       }
 
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -82,6 +111,27 @@ class OpenAiCompatibleAiService implements AiService {
     } finally {
       if (client == null) httpClient.close();
     }
+  }
+
+  /// 尝试从常见错误响应中提取服务端错误信息（OpenAI/DeepSeek 格式）。
+  String _extractErrorDetail(http.Response response) {
+    try {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      if (decoded is Map<String, dynamic>) {
+        final error = decoded['error'];
+        if (error is Map<String, dynamic>) {
+          final message = error['message'];
+          if (message is String && message.isNotEmpty) {
+            return '：$message';
+          }
+        } else if (error is String && error.isNotEmpty) {
+          return '：$error';
+        }
+      }
+    } catch (_) {
+      // 非 JSON 错误体，忽略
+    }
+    return '';
   }
 
   @override

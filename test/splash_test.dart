@@ -128,7 +128,8 @@ void main() {
     expect(find.text('浅色模式'), findsOneWidget);
     expect(find.text('深色模式'), findsOneWidget);
     expect(find.text('AI 服务设置'), findsOneWidget);
-    expect(find.text('保存 AI 服务配置'), findsOneWidget);
+    expect(find.text('保存配置'), findsOneWidget);
+    expect(find.text('测试连接'), findsOneWidget);
     expect(find.text('关闭'), findsOneWidget);
   });
 }
