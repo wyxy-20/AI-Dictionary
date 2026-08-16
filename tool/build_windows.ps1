@@ -14,6 +14,28 @@
 #>
 $ErrorActionPreference = 'Stop'
 
+# ---- 自动定位 Flutter SDK（支持 FVM 与常见安装位置）----
+if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
+    if (Get-Command fvm -ErrorAction SilentlyContinue) {
+        function flutter { fvm flutter @args }
+    } else {
+        $flutterCandidates = @(
+            "$env:LOCALAPPDATA\flutter\bin",
+            "$env:USERPROFILE\flutter\bin",
+            'C:\flutter\bin',
+            'C:\src\flutter\bin'
+        )
+        $flutterBin = $flutterCandidates |
+            Where-Object { Test-Path (Join-Path $_ 'flutter.bat') } |
+            Select-Object -First 1
+        if ($flutterBin) {
+            $env:Path = "$flutterBin;$env:Path"
+        } else {
+            throw "未找到 Flutter SDK。请将其加入 PATH，或设置环境变量 FLUTTER_ROOT。"
+        }
+    }
+}
+
 $real = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $junction = Join-Path (Split-Path $real) 'ai-dict-build'
 
@@ -73,7 +95,8 @@ if (-not $iscc) {
         'C:\Program Files (x86)\Inno Setup 6\ISCC.exe',
         'C:\Program Files\Inno Setup 6\ISCC.exe',
         "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
-        "$env:LOCALAPPDATA\Inno Setup 6\ISCC.exe"
+        "$env:LOCALAPPDATA\Inno Setup 6\ISCC.exe",
+        "$env:LOCALAPPDATA\InnoSetup6\ISCC.exe"
     )
     $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
