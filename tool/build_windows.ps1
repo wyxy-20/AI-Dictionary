@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     构建 AI Dictionary Windows Release 版本并生成安装包。
 .DESCRIPTION

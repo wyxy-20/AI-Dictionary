@@ -18,6 +18,7 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      fontFamily: 'Noto Sans SC',
       visualDensity: VisualDensity.standard,
     );
 
