@@ -8,12 +8,25 @@
 
 ## 下载即用（普通用户）
 
-直接到 [Releases](../../releases) 下载最新版压缩包，解压后运行 `ai_dictionary.exe` 即可，无需安装。
+到 [Releases](../../releases) 下载最新版，二选一：
+
+| 版本 | 说明 |
+|---|---|
+| **安装版** `*-setup.exe`（推荐） | 标准安装程序：开始菜单快捷方式、控制面板「程序和功能」可卸载，安装无需管理员权限 |
+| **便携版** `*-windows.zip` | 解压后运行 `ai_dictionary.exe` 即可，无需安装（卸载 = 删除文件夹） |
 
 - **SmartScreen 提示**：当前版本尚未代码签名，Windows 首次运行可能提示"未知发布者"，点击"更多信息 → 仍要运行"即可；
 - **数据本地存储**：词条、收藏、历史全部保存在本机，不上传任何服务器；
 - **词库自动同步**：启动时自动从远程词库增量更新，无需手动操作；
 - **AI 解释**：需要自备模型服务 API Key（支持 DeepSeek、OpenAI 及本地模型），在软件"设置 → AI 服务"中配置。
+
+### 卸载
+
+- **安装版**：控制面板「程序和功能」→ 卸载 AI Dictionary；或在开始菜单选择「卸载 AI Dictionary」；
+  卸载时会询问是否**同时删除用户数据**（词条、收藏、历史、AI 设置与运行日志），
+  默认仅卸载程序、保留数据（重装后可继续使用）；
+- **便携版**：删除解压目录即可；如需清除用户数据，见下方「数据位置」。
+- 卸载/删除后**系统层无残留**（不写注册表运行项、无后台服务；全局热键与托盘图标随程序退出自动释放）。
 
 ## 功能一览
 
@@ -211,7 +224,14 @@ fvm flutter run -d windows
 .\tool\build_windows.ps1
 ```
 
-产物位置：`build\windows\x64\runner\Release\ai_dictionary.exe`
+脚本会自动完成：构建 Release → 生成便携版 zip → 生成安装版 Setup.exe（需已安装
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)，或通过环境变量 `ISCC` 指定
+`ISCC.exe` 路径）。
+
+产物位置：
+- `build\windows\x64\runner\Release\ai_dictionary.exe`（原始构建）
+- `dist\AI-Dictionary-vX.Y.Z-windows.zip`（便携版）
+- `dist\AI-Dictionary-vX.Y.Z-setup.exe`（安装版，含卸载程序）
 
 ### 数据位置
 
