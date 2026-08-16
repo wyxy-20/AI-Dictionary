@@ -252,4 +252,102 @@ void main() {
     expect(AppConfig.remoteCheckInterval.inHours, 24);
     expect(AppConfig.remoteTimeout.inSeconds, lessThanOrEqualTo(10));
   });
+
+  // ---------- 多源回退（R1） ----------
+
+  UpdateService multiSourceService(
+    List<Future<http.Response> Function(http.Request request)> handlers, {
+    List<String>? baseUrls,
+  }) {
+    final sources = baseUrls ?? ['http://source-a.test', 'http://source-b.test'];
+    return UpdateService(
+      db,
+      client: MockClient((request) async {
+        // 根据请求 URL 命中选择对应的 handler
+        for (var i = 0; i < sources.length; i++) {
+          if (request.url.toString().startsWith(sources[i])) {
+            return handlers[i](request);
+          }
+        }
+        return http.Response('no source', 404);
+      }),
+      baseUrls: sources,
+    );
+  }
+
+  test('主源不可达时自动回退到备源', () async {
+    final remoteTerms = [termJson(makeTerm('MCP', '模型上下文协议'))];
+    final service = multiSourceService(
+      [
+        (request) async => http.Response('boom', 500),
+        (request) async {
+          if (request.url.path.endsWith('version.json')) {
+            return jsonResponse({
+              'version': '2.0.0',
+              'update_time': '2026-08-08',
+              'terms_count': remoteTerms.length,
+            });
+          }
+          return jsonResponse(remoteTerms);
+        },
+      ],
+      baseUrls: ['http://source-a.test', 'http://source-b.test'],
+    );
+
+    final result = await service.syncIfNeeded();
+
+    expect(result.status, 'updated');
+    expect(result.addedCount, 1);
+    expect(await TermDao(db).count(), 4);
+  });
+
+  test('全部源不可达：降级到本地词库', () async {
+    final service = multiSourceService([
+      (request) async => throw http.ClientException('A down'),
+      (request) async => throw http.ClientException('B down'),
+    ]);
+
+    final result = await service.syncIfNeeded();
+
+    expect(result.status, 'failed');
+    expect(await TermDao(db).count(), 3);
+  });
+
+  test('version 与 terms 使用同一成功源（避免 CDN 缓存错配）', () async {
+    final remoteTerms = [termJson(makeTerm('LoRA', '低秩适配'))];
+    final service = multiSourceService(
+      [
+        // 源 A：version 成功但 terms 失败（模拟 CDN 缓存不一致）
+        (request) async {
+          if (request.url.path.endsWith('version.json')) {
+            return jsonResponse({
+              'version': '3.0.0',
+              'update_time': '2026-08-08',
+              'terms_count': remoteTerms.length,
+            });
+          }
+          return http.Response('terms not ready', 404);
+        },
+        // 源 B：完全可用
+        (request) async {
+          if (request.url.path.endsWith('version.json')) {
+            return jsonResponse({
+              'version': '3.0.0',
+              'update_time': '2026-08-08',
+              'terms_count': remoteTerms.length,
+            });
+          }
+          return jsonResponse(remoteTerms);
+        },
+      ],
+      baseUrls: ['http://source-a.test', 'http://source-b.test'],
+    );
+
+    final result = await service.syncIfNeeded();
+
+    // version 来自源 A，terms 先尝试源 A 失败后回退源 B，最终仍成功
+    expect(result.status, 'updated');
+    expect(result.addedCount, 1);
+    expect(await TermDao(db).count(), 4);
+  });
 }

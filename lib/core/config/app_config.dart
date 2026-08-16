@@ -5,7 +5,7 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.8.1';
+  static const String version = '1.9.0';
 
   static const String databaseFileName = 'ai_dictionary.db';
   static const int databaseVersion = 4;
@@ -29,12 +29,27 @@ class AppConfig {
   /// 词库最低词条数量（用于测试与启动自检）。
   static const int minSeedTerms = 300;
 
-  /// 远程词库来源（第一阶段：GitHub Raw）。
+  /// 远程词库来源（多源回退链，按顺序尝试，第一个可达的生效）。
   /// 发布新词库时请替换为你的仓库地址，结构：
   ///   `<baseUrl>/version.json`
   ///   `<baseUrl>/terms.json`
-  static const String remoteDictionaryBaseUrl =
-      'https://raw.githubusercontent.com/wyxy-20/AI-Terms-Database/main';
+  ///
+  /// 源 1：jsDelivr CDN（国内可达性最好，免费，自动同步 GitHub 仓库；
+  ///       `@main` 分支内容最长缓存 12 小时，对每周更新节奏无感）；
+  /// 源 2：GitHub Raw（海外 / 无污染网络环境）。
+  static const List<String> remoteDictionaryBaseUrls = [
+    'https://cdn.jsdelivr.net/gh/wyxy-20/AI-Terms-Database@main',
+    'https://raw.githubusercontent.com/wyxy-20/AI-Terms-Database/main',
+  ];
+
+  /// 兼容旧配置：单个源的便捷访问（取第一个源）。
+  static String get remoteDictionaryBaseUrl => remoteDictionaryBaseUrls.first;
+
+  /// GitHub 仓库相关 URL（应用内检查更新 / 反馈入口）。
+  static const String repoUrl = 'https://github.com/wyxy-20/AI-Dictionary';
+  static const String releasesApiUrl = '$repoUrl/releases/latest';
+  static const String releasesUrl = '$repoUrl/releases';
+  static const String issuesUrl = '$repoUrl/issues/new/choose';
 
   /// 自动检查更新的最小间隔（避免每次启动重复下载）。
   static const Duration remoteCheckInterval = Duration(hours: 24);

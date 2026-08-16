@@ -14,7 +14,10 @@ class DataExportService {
   final AppDatabase database;
 
   /// 将词库导出为 JSON 备份文件，返回文件路径。
-  Future<String> exportBackup() async {
+  ///
+  /// [directory] 用于测试注入备份目录；为空时导出到
+  /// `文档/AIDictionary/backups`（path_provider 不可用时回退到当前目录）。
+  Future<String> exportBackup({String? directory}) async {
     final terms = await TermDao(database).getAll();
     final payload = jsonEncode({
       'app': 'AI Dictionary',
@@ -24,10 +27,14 @@ class DataExportService {
     });
 
     Directory base;
-    try {
-      base = await getApplicationDocumentsDirectory();
-    } catch (_) {
-      base = Directory.current;
+    if (directory != null) {
+      base = Directory(directory);
+    } else {
+      try {
+        base = await getApplicationDocumentsDirectory();
+      } catch (_) {
+        base = Directory.current;
+      }
     }
     final dir = Directory(p.join(base.path, 'AIDictionary', 'backups'));
     await dir.create(recursive: true);
