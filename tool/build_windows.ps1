@@ -96,7 +96,8 @@ if (-not $iscc) {
         'C:\Program Files\Inno Setup 6\ISCC.exe',
         "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
         "$env:LOCALAPPDATA\Inno Setup 6\ISCC.exe",
-        "$env:LOCALAPPDATA\InnoSetup6\ISCC.exe"
+        "$env:LOCALAPPDATA\InnoSetup6\ISCC.exe",
+        "$env:USERPROFILE\InnoSetup6\ISCC.exe"
     )
     $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 }

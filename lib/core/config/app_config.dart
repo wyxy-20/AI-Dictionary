@@ -5,20 +5,20 @@ class AppConfig {
   static const String appName = 'AI Dictionary';
   static const String appNameZh = 'AI时代词典';
   static const String appTitle = 'AI Dictionary · AI时代词典';
-  static const String version = '1.9.0';
+  static const String version = '1.9.1';
 
   static const String databaseFileName = 'ai_dictionary.db';
   static const int databaseVersion = 4;
 
   /// 内置 JSON 词库的版本号（本地词典初始版本）。
-  static const String seedDictionaryVersion = '1.0.0';
+  /// 应与远程词库当前版本一致：一致时启动直接跳过下载，
+  /// 只有远程词库更新（version 升高）才会触发增量同步。
+  static const String seedDictionaryVersion = '1.4.0';
 
-  /// 词库种子数据存放目录（每个字母一个 JSON 文件）。
+  /// 词库种子数据：单个 JSON 文件（完整词库，随版本内置）。
+  /// 由 tool/sync_seed.ps1 从远程词库同步生成。
   static const String seedAssetFolder = 'assets/data/terms';
-  static const List<String> seedLetters = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-  ];
+  static const String seedTermsFile = '$seedAssetFolder/terms.json';
 
   /// 历史记录最多保留的条数。
   static const int maxHistoryEntries = 100;
@@ -55,7 +55,8 @@ class AppConfig {
   static const Duration remoteCheckInterval = Duration(hours: 24);
 
   /// 远程请求超时（网络异常时快速降级到本地词库）。
-  static const Duration remoteTimeout = Duration(seconds: 8);
+  /// 注：terms.json（约 450KB）经国内网络 / 代理通道可能较慢，需留足余量。
+  static const Duration remoteTimeout = Duration(seconds: 30);
 
   /// AI 服务默认配置（OpenAI 兼容接口）。
   static const String defaultAiBaseUrl = 'https://api.openai.com/v1';
