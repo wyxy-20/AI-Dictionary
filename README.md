@@ -2,7 +2,7 @@
 
 面向 AI 学习者的专业 AI 术语词典 —— Windows 桌面应用。
 
-基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（启动后自动同步远程词库，当前已收录 **1110+** 条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
+基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（启动后自动同步远程词库，当前已收录 **1125+** 条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
 
 本项目基于 [MIT License](LICENSE) 开源。
 
@@ -92,16 +92,17 @@ tool/generate_icon.py          # 应用图标生成脚本
 规则：
 
 - **24 小时内已成功检查过**则直接跳过，避免每次启动重复下载；
+- **多源回退**：按顺序尝试 jsDelivr CDN → GitHub Raw，国内网络环境也能正常同步；
 - **无网络或远程不可达**时静默降级到本地 SQLite 词库，正常进入软件，不弹错误；
 - 本地版本记录在 `dictionary_version` 表（version / update_time / terms_count / last_check_time）。
 
 ### 如何发布新的在线词库
 
-项目已附带了可直接上传的远程词库目录 [AI-Terms-Database](AI-Terms-Database/)：
-包含 `version.json`（1.1.0，1094 条）与 `terms.json`，字段与客户端完全兼容。
+远程词库维护在独立仓库 [AI-Terms-Database](https://github.com/wyxy-20/AI-Terms-Database)：
+包含 `version.json` 与 `terms.json`，字段与客户端完全兼容。
 
-1. 在 GitHub 创建公开仓库 `AI-Terms-Database`（或任意名称）；
-2. 把本项目的 `AI-Terms-Database/` 目录内容（`version.json`、`terms.json`、`README.md`）上传到仓库；
+1. 在 GitHub 公开仓库 `AI-Terms-Database` 中更新词条；
+2. 把 `version.json` 的版本号调高（如 1.2.0 → 1.3.0），软件会在下次检查时自动下载并增量添加新增词条；
 
    `version.json`：
 
@@ -131,11 +132,19 @@ tool/generate_icon.py          # 应用图标生成脚本
    ```
 
 3. 修改 [app_config.dart](lib/core/config/app_config.dart) 中的
-   `remoteDictionaryBaseUrl`，指向你的 GitHub Raw 地址；
+   `remoteDictionaryBaseUrls`（多源回退列表），指向你的词库地址；
 4. 重新构建发布。已安装的用户下次打开软件（或超过 24 小时后）会自动同步，无需重新安装。
 
 > 每次发布新版本时把 `version.json` 的版本号调高（如 1.2.0），
 > 软件会在下次检查时自动下载并增量添加新增词条。
+
+> **同步源说明（多源回退）**：客户端按顺序尝试 `jsDelivr CDN → GitHub Raw`，
+> 第一个可达的源生效，`version.json` 与 `terms.json` 始终来自同一源。
+> jsDelivr 对 `@main` 分支内容有最长 12 小时缓存——对每周更新的词库节奏无感；
+> 若要立即生效，可在 AI-Terms-Database 仓库打 tag（如 `v1.5.0`）并在 URL 中使用该 tag。
+
+> **质量门禁**：发布词库前请运行 `python tool/validate_terms.py`（校验字段完整性、
+> 重复词条、难度范围），也建议在 AI-Terms-Database 仓库的 CI 中作为门禁。
 
 ## AI 智能解释系统
 
@@ -164,18 +173,32 @@ tool/generate_icon.py          # 应用图标生成脚本
 
 ### 环境要求
 
-- Flutter 3.44+（Dart 3.12+）
+- Flutter 3.44+（Dart 3.12+），建议使用 [FVM](https://fvm.app/) 锁定版本（仓库已附 `.fvmrc`，`fvm use` 即可）
 - Visual Studio 2022 Build Tools（含「使用 C++ 的桌面开发」工作负载）
 - Windows 11 / 10
 
 ### 开发运行
 
 ```powershell
-flutter pub get
-flutter test          # 运行全部测试
+fvm use            # 使用 .fvmrc 锁定的 Flutter 版本（或直接使用已安装的 flutter）
+fvm flutter pub get
+fvm flutter test   # 运行全部测试
 cd ..\ai-dict-build   # 目录联接（junction），可由 tool\build_windows.ps1 自动创建
-flutter run -d windows
+fvm flutter run -d windows
 ```
+
+> **国内网络提示**：测试依赖 `sqlite3` 包，首次运行会尝试从 GitHub 下载
+> 预编译 DLL（`raw.githubusercontent.com` 在国内可能超时）。若 `flutter test`
+> 报 "Building native assets failed"，执行：
+>
+> ```powershell
+> $env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
+> $env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
+> Invoke-WebRequest -Uri "https://ghfast.top/https://github.com/simolus3/sqlite3.dart/releases/download/sqlite3-3.5.1/sqlite3.x64.windows.dll" -OutFile "$env:TEMP\sqlite3.dll"
+> New-Item -ItemType Directory -Force -Path ".dart_tool\hooks_runner\shared\sqlite3\build\download-e6ebc264" | Out-Null
+> Copy-Item "$env:TEMP\sqlite3.dll" ".dart_tool\hooks_runner\shared\sqlite3\build\download-e6ebc264\sqlite3.dll" -Force
+> flutter test   # 重新运行即可
+> ```
 
 > 与构建同理，`flutter run` 也需要在 ASCII 联接目录中执行。
 
@@ -248,12 +271,37 @@ flutter test
 ```
 
 覆盖：词条模型、搜索服务（中英 / 模糊 / 关键词）、SQLite DAO（排序、收藏、历史去重与上限、
-设置）、JSON 词库完整性（319 条、无重复、必备词条齐全）、主界面三栏交互与收藏流程。
+设置）、JSON 词库完整性（319 条、无重复、必备词条齐全）、主界面三栏交互与收藏流程、
+远程同步（多源回退 / 24h 节流 / 增量更新保用户数据 / 网络降级）、自动备份、运行日志、
+应用更新检查、版本一致性（50+ 个用例）。CI 同时运行 `dart analyze` 与 Windows Release 构建。
+
+## Roadmap（规划中，尚未实现）
+
+以下功能在设置页「AI 功能」中已预留入口，但**当前版本未实现**：
+
+- **AI 问答**：就 AI 概念自由提问
+- **学习路径**：输入目标自动生成学习路线
+- **术语对比**：对比两个术语的异同
+- **知识库连接**：对接 Obsidian / Markdown / 个人笔记
+
+## 性能说明
+
+- 词库当前全量加载到内存（约 1200 条，占内存 < 10MB），查询在内存中完成；
+- 搜索框带 200ms 防抖，避免逐键全量重算；
+- 词库规模在 **5000 条以内**无需任何改动；超过后建议引入 SQLite 分页查询
+  （`terms` 表已建索引，DAO 层已预留按字母过滤的能力）。
+
+## 词库内容授权
+
+- **代码**：MIT License（见 [LICENSE](LICENSE)）；
+- **词条内容**（`assets/data/terms/*.json` 与远程词库）：采用
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 授权，
+  可自由使用、修改与分发，需署名「AI Dictionary 词库」。
 
 ## 版本备份与恢复
 
-项目已纳入 Git 版本管理，当前稳定版基线为 **v1.0.0**，并已生成独立 ZIP 快照，
-未来任何时候都可以恢复到当前状态。
+项目已纳入 Git 版本管理，v1.0.0 为历史基线（已生成独立 ZIP 快照），
+当前版本见 [CHANGELOG.md](CHANGELOG.md) 与 GitHub Releases。
 
 ### 日常开发建议
 
@@ -264,7 +312,7 @@ git commit -m "描述本次改动"
 
 每次完成一个稳定功能后提交一次；出了问题可以随时回退。
 
-### 恢复到 v1.0.0（当前版本）
+### 恢复到历史版本
 
 ```powershell
 git checkout v1.0.0 -- .
@@ -293,8 +341,12 @@ git checkout -- .
 ## 隐私与安全
 
 - **数据本地存储**：词条、收藏、历史、设置与 AI 解释缓存全部保存在本机 SQLite（Windows 路径：`%APPDATA%\com.aidictionary\AI Dictionary\ai_dictionary.db`），不会上传到任何服务器。
-- **启动同步**：仅从 `raw.githubusercontent.com/wyxy-20/AI-Terms-Database` 读取 `version.json` / `terms.json`，不发送任何个人数据。
+- **启动同步**：仅从 `jsDelivr CDN`（主）与 `raw.githubusercontent.com`（备）读取 `version.json` / `terms.json`（多源回退），不发送任何个人数据。
 - **AI 解释**：点击 AI 解释时，会把该词条的公开内容（名称 / 分类 / 描述 / 应用 / 相关词条）发送到你配置的模型服务（如 DeepSeek、OpenAI 或本地 Ollama / LM Studio）。请选择信任的服务商；使用本地模型时数据不会离开本机。
-- **API Key 保护**：AI 服务 API Key 使用 Windows DPAPI 加密后存入本地数据库，仅当前 Windows 用户可解密（v1.8.0 起），旧版本明文会自动迁移。
+- **API Key 保护**：AI 服务 API Key 使用 Windows DPAPI 加密后存入本地数据库，仅当前 Windows 用户可解密（v1.8.0 起），旧版本明文会自动迁移。注意：DPAPI 绑定当前用户与机器，重装系统或更换电脑后需在设置中重新填写 API Key。
 - **全局快捷键**：启用全局快捷搜索后，应用会在系统层面监听你设置的热键组合，仅用于触发搜索窗口，不记录其他按键。
-- **无遥测**：应用不包含任何统计、崩溃上报或广告 SDK。
+- **杀软误报说明**：由于未代码签名 + 全局热键监听，部分杀毒软件可能误报。请从
+  [官方 Releases](https://github.com/wyxy-20/AI-Dictionary/releases) 下载，
+  并将软件加入信任区。应用不包含任何遥测、统计或广告 SDK。
+- **运行日志**：运行日志写入 `%APPDATA%\com.aidictionary\AI Dictionary\logs\app.log`
+  （仅本地，不上传）；设置页可一键复制日志用于反馈问题。

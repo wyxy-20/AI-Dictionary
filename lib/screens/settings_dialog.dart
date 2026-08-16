@@ -14,10 +14,12 @@ import '../providers/dictionary_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/ai/ai_service.dart';
 import '../services/ai/openai_compatible_ai_service.dart';
+import '../services/app_update_service.dart';
 import '../services/data_export_service.dart';
 import '../services/seed_service.dart';
 import '../services/quick_search/quick_search_controller.dart';
 import '../services/quick_search/hotkey_codec.dart';
+import '../utils/app_logger.dart';
 
 /// 设置对话框：外观、数据管理、AI 功能预览、关于。
 class SettingsDialog extends StatefulWidget {
@@ -167,6 +169,102 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ),
       );
     });
+  }
+
+  /// 复制运行日志到剪贴板（用于反馈问题）。
+  Future<void> _exportLog() async {
+    final s = AppStrings.of(context);
+    final log = await AppLogger.instance.readLog();
+    if (!mounted) return;
+    if (log.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.logEmpty)),
+      );
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: log));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(s.logCopied)),
+    );
+  }
+
+  /// 检查 GitHub 是否有新版本。
+  Future<void> _checkUpdate() async {
+    final s = AppStrings.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(content: Text(s.checkingUpdate), duration: const Duration(seconds: 3)),
+    );
+    final result = await AppUpdateService().checkLatestRelease();
+    if (!mounted) return;
+    if (result == null) {
+      await _showUpdateResult(
+        title: s.updateCheckFailed,
+        body: s.updateCheckFailedBody,
+        link: AppConfig.releasesUrl,
+      );
+      return;
+    }
+    final latest = result.$1;
+    final url = result.$2;
+    if (AppUpdateService().hasUpdate(latest)) {
+      await _showUpdateResult(
+        title: s.updateAvailable,
+        body: s.updateAvailableBody(AppConfig.version, latest),
+        link: url,
+      );
+    } else {
+      await _showUpdateResult(
+        title: s.updateLatest,
+        body: s.updateLatestBody(AppConfig.version),
+        link: AppConfig.releasesUrl,
+      );
+    }
+  }
+
+  /// 显示更新结果对话框（含"复制链接"）。
+  Future<void> _showUpdateResult({
+    required String title,
+    required String body,
+    required String link,
+  }) async {
+    final s = AppStrings.of(context);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: SelectableText(body),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: link));
+              if (!ctx.mounted) return;
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(content: Text(AppStrings.of(ctx).linkCopied)),
+              );
+              Navigator.of(ctx).pop();
+            },
+            child: Text(s.copyLink),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(s.close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 复制 GitHub Issue 链接（反馈入口）。
+  Future<void> _copyIssueLink() async {
+    final s = AppStrings.of(context);
+    await Clipboard.setData(ClipboardData(text: AppConfig.issuesUrl));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(s.issueLinkCopied)),
+    );
   }
 
   Future<void> _clearHistory() async {
@@ -432,6 +530,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             style: const TextStyle(fontSize: 11.5),
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            s.dpapiHint,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              height: 1.5,
+                              color: scheme.outline,
+                            ),
+                          ),
+                        ),
                         TextField(
                           controller: _baseUrlCtrl,
                           enabled: !_busy,
@@ -554,6 +663,25 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               height: 1.6,
                               color: scheme.onSurfaceVariant,
                             ),
+                          ),
+                          const SizedBox(height: 6),
+                          _ActionRow(
+                            icon: Icons.system_update_alt_rounded,
+                            label: s.checkUpdate,
+                            caption: s.checkUpdateCaption,
+                            onTap: _busy ? null : _checkUpdate,
+                          ),
+                          _ActionRow(
+                            icon: Icons.bug_report_outlined,
+                            label: s.feedback,
+                            caption: s.feedbackCaption,
+                            onTap: _busy ? null : _copyIssueLink,
+                          ),
+                          _ActionRow(
+                            icon: Icons.article_outlined,
+                            label: s.exportLog,
+                            caption: s.exportLogCaption,
+                            onTap: _busy ? null : _exportLog,
                           ),
                         ],
                       ),
