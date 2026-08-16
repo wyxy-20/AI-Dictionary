@@ -19,6 +19,7 @@ import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/ai/secure_key_store.dart';
+import 'services/backup_service.dart';
 import 'services/search_service.dart';
 import 'services/seed_service.dart';
 import 'services/tray_service.dart';
@@ -26,6 +27,7 @@ import 'services/update_service.dart';
 import 'services/quick_search/quick_search_controller.dart';
 import 'services/quick_search/quick_search_channels.dart';
 import 'screens/quick_search_window.dart';
+import 'utils/app_logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,13 +132,14 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
   /// 启动流程：打开数据库 -> 导入内置词库 -> 自动同步远程词库 -> 加载主界面。
   Future<void> _bootstrap() async {
     final stopwatch = Stopwatch()..start();
+    await AppLogger.instance.init();
 
     // 1. 数据库初始化 + 内置词库导入（失败不阻断启动）。
     try {
       await widget.database.open();
       await SeedService(widget.database).seedIfNeeded();
-    } catch (_) {
-      // 数据库异常：继续尝试进入界面。
+    } catch (e) {
+      await AppLogger.instance.error('bootstrap', '数据库初始化失败：$e');
     }
 
     // 2. 自动检查并同步远程词库（网络异常静默降级）。
@@ -150,8 +153,8 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
           });
       await updateService.syncIfNeeded();
       if (mounted) setState(() => _detailKey = SyncStage.done.name);
-    } catch (_) {
-      // 静默降级，不阻断启动。
+    } catch (e) {
+      await AppLogger.instance.error('bootstrap', '远程词库同步失败：$e');
     }
 
     // 3. 加载 Provider 数据（主界面数据源）。
@@ -161,9 +164,13 @@ class _AIDictionaryAppState extends State<AIDictionaryApp> {
       await _dictionaryProvider.load();
       await _quickSearchController.start();
       await _trayService.init();
-    } catch (_) {
-      // 保持空状态进入主界面。
+    } catch (e) {
+      await AppLogger.instance.error('bootstrap', '状态加载失败：$e');
     }
+
+    // 3.5 自动备份数据库（到期才备份，失败不影响启动）。
+    await BackupService(widget.database, directory: widget.database.directory)
+        .maybeBackup();
 
     // 4. 保证加载页至少展示片刻，避免闪烁。
     final remaining = 700 - stopwatch.elapsedMilliseconds;
