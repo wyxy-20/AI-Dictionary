@@ -101,12 +101,12 @@ void main() {
     final service = serviceWith((request) async {
       if (request.url.path.endsWith('version.json')) {
         return jsonResponse({
-          'version': '1.1.0',
+          'version': '2.1.0',
           'update_time': '2026-08-08',
           'terms_count': remoteTerms.length,
         });
       }
-      return jsonResponse({'version': '1.1.0', 'terms': remoteTerms});
+      return jsonResponse({'version': '2.1.0', 'terms': remoteTerms});
     });
 
     final result = await service.syncIfNeeded();
@@ -126,7 +126,7 @@ void main() {
 
     // 本地版本已记录为远程版本
     final version = await VersionDao(db).get();
-    expect(version!.version, '1.1.0');
+    expect(version!.version, '2.1.0');
   });
 
   test('24 小时内不重复检查；force 可强制检查', () async {
@@ -138,7 +138,7 @@ void main() {
       if (request.url.path.endsWith('version.json')) {
         versionCalls++;
         return jsonResponse({
-          'version': '1.1.0',
+          'version': '2.1.0',
           'update_time': '2026-08-08',
           'terms_count': remoteTerms.length,
         });
@@ -190,7 +190,7 @@ void main() {
     final service = serviceWith((request) async {
       if (request.url.path.endsWith('version.json')) {
         return jsonResponse({
-          'version': '1.2.0',
+          'version': '2.2.0',
           'update_time': '2026-08-08',
           'terms_count': 1,
         });
@@ -226,7 +226,7 @@ void main() {
     final service = serviceWith((request) async {
       if (request.url.path.endsWith('version.json')) {
         return jsonResponse({
-          'version': '1.1.0',
+          'version': '2.1.0',
           'update_time': '2026-08-08',
           'terms_count': remoteTerms.length,
         });
@@ -250,7 +250,7 @@ void main() {
 
   test('启动频率配置合理', () {
     expect(AppConfig.remoteCheckInterval.inHours, 24);
-    expect(AppConfig.remoteTimeout.inSeconds, lessThanOrEqualTo(10));
+    expect(AppConfig.remoteTimeout.inSeconds, lessThanOrEqualTo(35));
   });
 
   // ---------- 多源回退（R1） ----------

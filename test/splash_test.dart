@@ -2,6 +2,7 @@ import 'package:ai_dictionary/database/app_database.dart';
 import 'package:ai_dictionary/database/term_dao.dart';
 import 'package:ai_dictionary/main.dart';
 import 'package:ai_dictionary/models/term.dart';
+import 'package:ai_dictionary/services/seed_service.dart';
 import 'package:ai_dictionary/services/update_service.dart';
 import 'package:ai_dictionary/screens/home_screen.dart';
 import 'package:ai_dictionary/services/quick_search/quick_search_controller.dart';
@@ -36,7 +37,10 @@ void main() {
     QuickSearchController.debugDisablePlatform = true;
     db = AppDatabase(factory: databaseFactoryFfiNoIsolate);
     await db.openInMemory();
-    await TermDao(db).insertAll([makeTerm('Agent', '智能体')]);
+    // 预置完整内置词库：避免启动时在 testWidgets 的 FakeAsync 环境中
+    // 执行种子导入（sqflite 异步操作在 FakeAsync 中无法完成）。
+    final terms = await SeedService(db).loadTerms();
+    await TermDao(db).insertAll(terms);
   });
 
   tearDown(() async {
@@ -63,6 +67,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search AI terms...'), findsOneWidget);
     expect(find.text('全部词条'), findsWidgets);
+    // 词条列表是虚拟化的（1125 条），目标词条需滚动到视口内
+    await tester.scrollUntilVisible(
+      find.text('Agent'),
+      120,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Agent'), findsOneWidget);
   });
 
@@ -81,6 +91,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Search AI terms...'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Agent'),
+      120,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('Agent'), findsOneWidget);
   });
 
