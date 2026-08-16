@@ -2,7 +2,7 @@
 
 面向 AI 学习者的专业 AI 术语词典 —— Windows 桌面应用。
 
-基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **319 个 AI 术语**（启动后自动同步远程词库，当前已收录 **1125+** 条），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
+基于 **Flutter Desktop + Dart + SQLite** 构建，内置 **1125 个 AI 术语**（随安装包内置完整词库，启动后自动检查远程更新），支持实时搜索、A-Z 字母导航、收藏与浏览历史、**启动自动同步远程词库**，数据全部本地保存、可离线使用。
 
 本项目基于 [MIT License](LICENSE) 开源。
 
@@ -79,7 +79,7 @@ lib/
 └── utils/string_utils.dart    # 编辑距离、搜索高亮等工具
 utils/version_utils.dart       # 语义化版本号比较
 
-assets/data/terms/             # 26 个字母 JSON 词库（319 个词条）
+assets/data/terms/             # 内置完整词库（terms.json，1125 条，随版本内置）
 test/                          # 单元测试 + 组件测试（40 个用例）
 tool/generate_icon.py          # 应用图标生成脚本
 ```
@@ -238,13 +238,13 @@ fvm flutter run -d windows
 - 数据库：`%APPDATA%\com.aidictionary\AI Dictionary\ai_dictionary.db`
 - 备份导出：`文档\AIDictionary\backups\ai_dictionary_backup_*.json`
 
-首次启动自动从 `assets/data/terms/*.json` 导入词库；后续在设置中可重置为初始数据。
+首次启动自动从 `assets/data/terms/terms.json` 导入词库；后续在设置中可重置为初始数据。
 
 ## 如何继续扩展
 
 ### 1. 新增 / 修改词条
 
-直接编辑 `assets/data/terms/<字母>.json`（JSON 数组），随后在设置中选择
+直接编辑 `assets/data/terms/terms.json`（JSON 数组），随后在设置中选择
 「重置为初始数据」，或删除数据库后重启应用重新导入。
 
 每个词条字段：
@@ -291,7 +291,7 @@ flutter test
 ```
 
 覆盖：词条模型、搜索服务（中英 / 模糊 / 关键词）、SQLite DAO（排序、收藏、历史去重与上限、
-设置）、JSON 词库完整性（319 条、无重复、必备词条齐全）、主界面三栏交互与收藏流程、
+设置）、JSON 词库完整性（1125 条、无重复、必备词条齐全）、主界面三栏交互与收藏流程、
 远程同步（多源回退 / 24h 节流 / 增量更新保用户数据 / 网络降级）、自动备份、运行日志、
 应用更新检查、版本一致性（50+ 个用例）。CI 同时运行 `dart analyze` 与 Windows Release 构建。
 
@@ -314,7 +314,7 @@ flutter test
 ## 词库内容授权
 
 - **代码**：MIT License（见 [LICENSE](LICENSE)）；
-- **词条内容**（`assets/data/terms/*.json` 与远程词库）：采用
+- **词条内容**（`assets/data/terms/terms.json` 与远程词库）：采用
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 授权，
   可自由使用、修改与分发，需署名「AI Dictionary 词库」。
 
