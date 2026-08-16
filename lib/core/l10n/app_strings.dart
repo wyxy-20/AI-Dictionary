@@ -135,6 +135,48 @@ class AppStrings {
       );
   String get close => _p('关闭', 'Close');
   String get cancel => _p('取消', 'Cancel');
+
+  // ---------- 设置：日志 / 更新 / 反馈 ----------
+  String get exportLog => _p('导出运行日志', 'Export Log');
+  String get exportLogCaption => _p(
+        '复制运行日志到剪贴板，便于反馈问题',
+        'Copy the app log to clipboard for bug reports',
+      );
+  String get logCopied => _p('运行日志已复制到剪贴板', 'App log copied to clipboard');
+  String get logEmpty => _p('当前没有日志内容', 'No log content yet');
+  String get checkUpdate => _p('检查更新', 'Check for Updates');
+  String get checkUpdateCaption => _p(
+        '查询 GitHub 最新版本（需联网）',
+        'Check the latest version on GitHub (requires network)',
+      );
+  String get checkingUpdate => _p('正在检查更新...', 'Checking for updates...');
+  String get updateAvailable => _p('发现新版本', 'New Version Available');
+  String updateAvailableBody(String current, String latest) => _p(
+        '当前版本 v$current，最新版本 v$latest。可前往 GitHub Releases 下载。',
+        'You are on v$current; the latest is v$latest. Download it from GitHub Releases.',
+      );
+  String get updateLatest => _p('已是最新版本', 'You are up to date');
+  String updateLatestBody(String current) => _p(
+        '当前已是最新版本 v$current。',
+        'You are on the latest version v$current.',
+      );
+  String get updateCheckFailed => _p('检查更新失败', 'Update check failed');
+  String get updateCheckFailedBody => _p(
+        '无法访问 GitHub，请检查网络后重试，或手动访问 Releases 页面。',
+        'Cannot reach GitHub. Check your network or visit the Releases page manually.',
+      );
+  String get copyLink => _p('复制链接', 'Copy Link');
+  String get linkCopied => _p('链接已复制到剪贴板', 'Link copied to clipboard');
+  String get feedback => _p('反馈问题', 'Feedback');
+  String get feedbackCaption => _p(
+        '复制 GitHub Issue 链接到剪贴板',
+        'Copy the GitHub Issue link to clipboard',
+      );
+  String get issueLinkCopied => _p('Issue 链接已复制到剪贴板', 'Issue link copied to clipboard');
+  String get dpapiHint => _p(
+        'API Key 使用 Windows DPAPI 加密存储，仅当前 Windows 用户可解密；重装系统或更换电脑后需重新填写。',
+        'API Key is encrypted with Windows DPAPI and can only be decrypted by the current Windows user. Re-enter it after reinstalling Windows or switching machines.',
+      );
   String get clearHistoryTitle => _p('清空浏览历史', 'Clear Browsing History');
   String get clearHistoryConfirm => _p('确定要清空所有浏览历史记录吗？此操作不可撤销。', 'Clear all browsing history? This cannot be undone.');
   String get clear => _p('清空', 'Clear');
