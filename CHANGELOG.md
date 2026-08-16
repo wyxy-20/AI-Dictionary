@@ -3,6 +3,16 @@
 本项目遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 所有可感知的变更都会记录在本文件中。
 
+## [1.9.2] - 2026-08-16
+
+### 新增
+- **内置思源黑体（Noto Sans SC）**：全局统一中英文字体（Regular / Medium / Bold），
+  告别 Segoe UI + 微软雅黑混排，界面观感更清爽统一。
+
+### 修复
+- **构建脚本编码**：`tool/build_windows.ps1` 增加 UTF-8 BOM，修复 Windows PowerShell 5.1
+  因中文注释导致的解析失败。
+
 ## [1.9.1] - 2026-08-16
 
 ### 修复
