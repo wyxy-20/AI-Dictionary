@@ -6,6 +6,7 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../core/config/app_config.dart';
+import '../core/constants/ai_presets.dart';
 import '../core/constants/app_constants.dart';
 import '../core/l10n/app_strings.dart';
 import '../models/ai_config.dart';
@@ -34,6 +35,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   late final TextEditingController _baseUrlCtrl;
   late final TextEditingController _apiKeyCtrl;
   late final TextEditingController _modelCtrl;
+  String _presetValue = AiServicePresets.customKey;
   bool _obscureKey = true;
 
   @override
@@ -43,6 +45,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _baseUrlCtrl = TextEditingController(text: config.baseUrl);
     _apiKeyCtrl = TextEditingController(text: config.apiKey);
     _modelCtrl = TextEditingController(text: config.modelName);
+    _presetValue =
+        AiServicePresets.match(config.baseUrl, config.modelName) ??
+            AiServicePresets.customKey;
   }
 
   @override
@@ -541,6 +546,42 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ),
                           ),
                         ),
+                        DropdownButtonFormField<String>(
+                          initialValue: _presetValue,
+                          isDense: true,
+                          decoration: InputDecoration(
+                            labelText: s.aiPresetLabel,
+                            helperText: s.aiPresetHint,
+                          ),
+                          items: [
+                            for (final preset in AiServicePresets.all)
+                              DropdownMenuItem<String>(
+                                value: preset.name,
+                                child: Text(preset.name),
+                              ),
+                            DropdownMenuItem<String>(
+                              value: AiServicePresets.customKey,
+                              child: Text(s.aiPresetCustom),
+                            ),
+                          ],
+                          onChanged: _busy
+                              ? null
+                              : (value) {
+                                  final preset = value == null ||
+                                          value == AiServicePresets.customKey
+                                      ? null
+                                      : AiServicePresets.byName(value);
+                                  if (preset != null) {
+                                    _baseUrlCtrl.text = preset.baseUrl;
+                                    _modelCtrl.text = preset.modelName;
+                                  }
+                                  setState(
+                                    () => _presetValue = value ??
+                                        AiServicePresets.customKey,
+                                  );
+                                },
+                        ),
+                        const SizedBox(height: 10),
                         TextField(
                           controller: _baseUrlCtrl,
                           enabled: !_busy,
@@ -578,7 +619,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           enabled: !_busy,
                           decoration: InputDecoration(
                             labelText: s.modelLabel,
-                            hintText: 'deepseek-chat / gpt-4o-mini / qwen-plus',
+                            hintText:
+                                'deepseek-v4-flash / gpt-4o-mini / qwen-plus',
                             isDense: true,
                           ),
                         ),

@@ -104,9 +104,16 @@ class AppStrings {
         '支持 OpenAI / DeepSeek / Qwen / 本地模型等 OpenAI 兼容接口',
         'Works with OpenAI-compatible APIs: OpenAI / DeepSeek / Qwen / local models.',
       );
-  String get baseUrlLabel => _p('AI 服务地址（Base URL）', 'Base URL');
-  String get apiKeyLabel => _p('API Key', 'API Key');
-  String get modelLabel => _p('模型名称（Model）', 'Model Name');
+String get baseUrlLabel => _p('AI 服务地址（Base URL）', 'Base URL');
+String get apiKeyLabel => _p('API Key', 'API Key');
+String get modelLabel => _p('模型名称（Model）', 'Model Name');
+String get aiPresetLabel => _p('AI 服务预设', 'AI Service Preset');
+String get aiPresetHint => _p(
+  '选择预设自动填入地址与模型名，只需填写 API Key；本地模型可填任意占位字符',
+  'Pick a preset to auto-fill the URL and model; only the API Key is needed. '
+  'Local models accept any placeholder.',
+);
+String get aiPresetCustom => _p('自定义（手动填写）', 'Custom (manual)');
   String get saveConfig => _p('保存配置', 'Save');
   String get testConnection => _p('测试连接', 'Test');
   String get configSaved => _p('AI 服务配置已保存', 'AI service configuration saved');
